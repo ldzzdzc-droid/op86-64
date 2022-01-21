@@ -57,9 +57,9 @@ git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-a
 #新加入插件第二部分
 pushd package/lean
 git clone --depth=1 https://github.com/ysc3839/luci-proto-minieap
-git clone --depth=1 https://github.com/rufengsuixing/luci-app-onliner
-git clone --depth=1 https://github.com/riverscn/openwrt-iptvhelper
-git clone --depth=1 https://github.com/frainzy1477/luci-app-clash
+#git clone --depth=1 https://github.com/rufengsuixing/luci-app-onliner
+#git clone --depth=1 https://github.com/riverscn/openwrt-iptvhelper
+#git clone --depth=1 https://github.com/frainzy1477/luci-app-clash
 #git clone --depth=1 https://github.com/jefferymvp/luci-app-koolproxyR
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 git clone --depth=1 https://github.com/BoringCat/luci-app-mentohust

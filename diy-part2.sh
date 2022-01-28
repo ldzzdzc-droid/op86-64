@@ -13,6 +13,9 @@
 # 添加温度显示
 sed -i 's/or "1"%>/or "1"%> ( <%=luci.sys.exec("expr `cat \/sys\/class\/thermal\/thermal_zone0\/temp` \/ 1000") or "?"%> \&#8451; ) /g' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 
+########### 更改大雕源码（可选）###########
+sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=5.4/g' target/linux/x86/Makefile
+
 # Modify default IP
 sed -i 's/192.168.1.1/10.0.0.3/g' package/base-files/files/bin/config_generate
 
@@ -72,7 +75,7 @@ git clone --depth=1 https://github.com/BoringCat/luci-app-mentohust
 git clone --depth=1 https://github.com/jerrykuku/luci-app-vssr
 git clone --depth=1 https://github.com/jerrykuku/lua-maxminddb
 git clone --depth=1 https://github.com/tianiue/luci-app-bypass
-#git clone --depth=1 https://github.com/iwrt/luci-app-ikoolproxy
+git clone --depth=1 https://github.com/iwrt/luci-app-ikoolproxy
 #git clone --depth=1 https://github.com/yuos-bit/luci-app-openclash
 git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon
 #git clone --depth=1 https://github.com/hyy-666/luci-app-qBittorrent-enhanced

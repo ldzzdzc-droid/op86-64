@@ -10,7 +10,7 @@
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 # Modify default IP
-ed -i 's/192.168.1.1/10.0.0.3/g' package/base-files/files/bin/config_generate
+sed -i 's/192.168.1.1/10.0.0.3/g' package/base-files/files/bin/config_generate
 
 git clone https://github.com/linkease/istore.git package/istore
 #sirpdboy

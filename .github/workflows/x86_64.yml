@@ -7,9 +7,7 @@
 # https://github.com/P3TERX/Actions-OpenWrt
 # Description: Build OpenWrt using GitHub Actions
 #
-
-name: Build x86_64OpenWrt
-
+name: Build x86_64 OpenWrt
 on:
   repository_dispatch:
   workflow_dispatch:

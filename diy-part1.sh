@@ -21,7 +21,7 @@ sed -i 's/KERNEL_PATCHVER:=5.4/KERNEL_PATCHVER:=5.15/g' ./target/linux/x86/Makef
 sed -i '$a src-git lienol https://github.com/Lienol/openwrt-package' feeds.conf.default
 # Add a feed source
 echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
-echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall;luci' >>feeds.conf.default
+#echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall;luci' >>feeds.conf.default
 #加入 DDNSTO到feeds配置文件里
 #echo 'src-git nas https://github.com/linkease/nas-packages.git;master' >> feeds.conf.default
 #echo 'src-git nas_luci https://github.com/linkease/nas-packages-luci.git;main' >> feeds.conf.default

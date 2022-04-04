@@ -53,7 +53,7 @@ git clone https://github.com/kiddin9/luci-app-dnsfilter.git package/luci-app-dns
 #git clone https://github.com/zzsj0928/luci-app-pushbot.git package/luci-app-pushbot
 git clone https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
-git clone https://github.com/1wrt/luci-app-ikoolproxy.git package/luci-app-ikoolproxy
+#git clone https://github.com/1wrt/luci-app-ikoolproxy.git package/luci-app-ikoolproxy
 #新加入插件第二部分
 pushd package/lean
 git clone --depth=1 https://github.com/ysc3839/luci-proto-minieap
@@ -72,7 +72,7 @@ git clone --depth=1 https://github.com/BoringCat/luci-app-mentohust
 git clone --depth=1 https://github.com/jerrykuku/luci-app-vssr
 git clone --depth=1 https://github.com/jerrykuku/lua-maxminddb
 #git clone --depth=1 https://github.com/tianiue/luci-app-bypass
-git clone --depth=1 https://github.com/1wrt/luci-app-ikoolproxy
+#git clone --depth=1 https://github.com/1wrt/luci-app-ikoolproxy
 #git clone --depth=1 https://github.com/yuos-bit/luci-app-openclash
 #git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon
 #git clone --depth=1 https://github.com/hyy-666/luci-app-qBittorrent-enhanced

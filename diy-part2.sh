@@ -58,7 +58,8 @@ git clone https://github.com/kiddin9/luci-app-dnsfilter.git package/luci-app-dns
 #git clone https://github.com/zzsj0928/luci-app-pushbot.git package/luci-app-pushbot
 git clone https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
-#git clone https://github.com/1wrt/luci-app-ikoolproxy.git package/luci-app-ikoolproxy
+git clone https://github.com/1wrt/luci-app-ikoolproxy.git package/luci-app-ikoolproxy
+git clone https://github.com/xiaorouji/openwrt-passwall2.git package/passwall2
 #新加入插件第二部分
 pushd package/lean
 #git clone --depth=1 https://github.com/ysc3839/luci-proto-minieap
@@ -84,4 +85,4 @@ git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent
 #git clone --depth=1 https://github.com/sirpdboy/luci-app-poweroffdevice
 popd
-svn co https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/luci-app-passwall2
+#svn co https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/luci-app-passwall2

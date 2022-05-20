@@ -51,15 +51,12 @@ git clone https://github.com/openwrt-develop/luci-theme-atmaterial.git package/l
 
 # Add luci-theme-argon
 git clone https://github.com/kiddin9/luci-app-dnsfilter.git package/luci-app-dnsfilter
-#git clone https://github.com/kenzok8/openwrt-packages.git package/openwrt-packages
 
 #添加额外非必须软件包
-#git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
-#git clone https://github.com/zzsj0928/luci-app-pushbot.git package/luci-app-pushbot
 git clone https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
 #git clone https://github.com/1wrt/luci-app-ikoolproxy.git package/luci-app-ikoolproxy
-git clone https://github.com/xiaorouji/openwrt-passwall2.git package/passwall2
+
 #新加入插件第二部分
 pushd package/lean
 #git clone --depth=1 https://github.com/ysc3839/luci-proto-minieap
@@ -78,11 +75,11 @@ git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 #git clone --depth=1 https://github.com/jerrykuku/luci-app-vssr
 #git clone --depth=1 https://github.com/jerrykuku/lua-maxminddb
 #git clone --depth=1 https://github.com/tianiue/luci-app-bypass
-git clone --depth=1 https://github.com/1wrt/luci-app-ikoolproxy
+#git clone --depth=1 https://github.com/1wrt/luci-app-ikoolproxy
 #git clone --depth=1 https://github.com/yuos-bit/luci-app-openclash
 #git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon
 #git clone --depth=1 https://github.com/hyy-666/luci-app-qBittorrent-enhanced
-#cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent
+cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent
 #git clone --depth=1 https://github.com/sirpdboy/luci-app-poweroffdevice
 popd
 #svn co https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/luci-app-passwall2

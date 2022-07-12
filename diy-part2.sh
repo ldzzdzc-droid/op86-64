@@ -52,8 +52,16 @@ git clone https://github.com/openwrt-develop/luci-theme-atmaterial.git package/l
 # Add luci-theme-argon
 git clone https://github.com/kiddin9/luci-app-dnsfilter.git package/luci-app-dnsfilter
 
+########### 更改大雕源码（可选）20220712增加###########
+sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=5.18/g' target/linux/x86/Makefile
+
+########### 更新 lean 的内置的 smartdns 版本 20220712增加###########
+sed -i 's/1.2021.35/2022.03.02/g' feeds/packages/net/smartdns/Makefile
+sed -i 's/f50e4dd0813da9300580f7188e44ed72a27ae79c/1fd18601e7d8ac88e8557682be7de3dc56e69105/g' feeds/packages/net/smartdns/Makefile
+sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
+
 #添加额外非必须软件包
-git clone https://github.com/pymumu/openwrt-smartdns package/smartdns
+####20220712注释掉 git clone https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
 #git clone https://github.com/1wrt/luci-app-ikoolproxy.git package/luci-app-ikoolproxy
 

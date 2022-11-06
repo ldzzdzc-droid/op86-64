@@ -37,7 +37,7 @@ jobs:
     
     steps:
     - name: Checkout
-      uses: actions/checkout@main
+      uses: actions/checkout@v3
 
     - name: Initialization environment
       env:
@@ -127,7 +127,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
         
     - name: Upload firmware directory
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v3
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
@@ -153,11 +153,11 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
-    - name: Delete workflow runs
-      uses: GitRML/delete-workflow-runs@main
-      with:
-        retain_days: 30
-        keep_minimum_runs: 30
+#   - name: Delete workflow runs
+#     uses: GitRML/delete-workflow-runs@main
+#     with:
+#       retain_days: 30
+#       keep_minimum_runs: 30
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.1.0

@@ -34,9 +34,10 @@ env:
   TZ: Asia/Shanghai
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-20.04
-
+    timeout-minutes: 560
+    
     steps:
     - name: Checkout
       uses: actions/checkout@main

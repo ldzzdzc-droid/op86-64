@@ -181,7 +181,7 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
-     - name: Delete workflow runs
+    - name: Delete workflow runs
        uses: GitRML/delete-workflow-runs@v3
        with:
          retain_days: 8

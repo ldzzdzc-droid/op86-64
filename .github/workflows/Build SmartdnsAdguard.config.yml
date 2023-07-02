@@ -7,7 +7,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: Build x86_64 OpenWrt smart Adguard 
+name: Build smartAdguard 
 
 on:
   repository_dispatch:

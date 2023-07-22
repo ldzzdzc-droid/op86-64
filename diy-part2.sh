@@ -41,7 +41,7 @@ git clone https://github.com/openwrt-develop/luci-theme-atmaterial.git package/l
 git clone https://github.com/kiddin9/luci-app-dnsfilter.git package/luci-app-dnsfilter
 
 ########### 更改大雕源码（可选）20220712增加###########
-# sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.1/g' target/linux/x86/Makefile
+sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.1/g' target/linux/x86/Makefile
 
 
 ########### 更新lean的内置的smartdns版本20230106 ###########

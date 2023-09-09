@@ -44,14 +44,14 @@ git clone https://github.com/kiddin9/luci-app-dnsfilter.git package/luci-app-dns
 sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.1/g' target/linux/x86/Makefile
 
 
-########### 更新lean的内置的smartdns版本20230106 ###########
-sed -i 's/1.2022.38/1.2023.41/g' feeds/packages/net/smartdns/Makefile
-sed -i 's/5a2559f0648198c290bb8839b9f6a0adab8ebcdc/60a3719ec739be2cc1e11724ac049b09a75059cb/g' feeds/packages/net/smartdns/Makefile
-sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
+########### 更新lean的内置的smartdns版本20230909注释掉了 ###########
+#sed -i 's/1.2022.38/1.2023.41/g' feeds/packages/net/smartdns/Makefile
+#sed -i 's/5a2559f0648198c290bb8839b9f6a0adab8ebcdc/60a3719ec739be2cc1e11724ac049b09a75059cb/g' feeds/packages/net/smartdns/Makefile
+#sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 
 
-#添加额外非必须软件包
-####20220712注释掉 git clone https://github.com/pymumu/openwrt-smartdns package/smartdns
+#添加额外非必须软件包####20230909加入第一行原来是释掉的 
+git clone https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
 
 #新加入插件第二部分

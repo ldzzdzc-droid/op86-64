@@ -61,4 +61,4 @@ git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 #git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome
 cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent
 popd
-svn co https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/luci-app-passwall2
+# svn co https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/luci-app-passwall2

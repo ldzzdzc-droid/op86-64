@@ -23,4 +23,5 @@ echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-pa
 echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
 # echo 'src-git smartdns https://github.com/pymumu/smartdns.git;packages' >>feeds.conf.default
 
-
+make package/nginx/compile V=s
+echo "/etc/init.d/nginx enable" >> files/Makefile

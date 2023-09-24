@@ -67,3 +67,8 @@ git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent
 popd
 # svn co https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/luci-app-passwall2
+
+pushd package/nginx/compile V=s
+echo "/etc/init.d/nginx enable" >> files/Makefile
+popd
+

@@ -68,7 +68,4 @@ cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorr
 popd
 # svn co https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/luci-app-passwall2
 
-pushd package/nginx/compile V=s
-echo "/etc/init.d/nginx enable" >> files/Makefile
-popd
 

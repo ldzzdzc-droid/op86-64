@@ -109,13 +109,13 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
         
-    - name: Update toolchain and compile nginx
-      run: |
-       cd openwrt
-       ./scripts/feeds update -a
-       ./scripts/feeds install -a -p toolchain
-       make package/nginx/compile V=s
-       echo "/etc/init.d/nginx enable" >> files/Makefile
+#    - name: Update toolchain and compile nginx
+#      run: |
+#       cd openwrt
+#       ./scripts/feeds update -a
+#       ./scripts/feeds install -a -p toolchain
+#       make package/nginx/compile V=s
+#       echo "/etc/init.d/nginx enable" >> files/Makefile
 
         
     - name: Compile the firmware

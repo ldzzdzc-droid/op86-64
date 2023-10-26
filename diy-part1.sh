@@ -23,6 +23,3 @@ echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-pa
 echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
 # echo 'src-git smartdns https://github.com/pymumu/smartdns.git;packages' >>feeds.conf.default
 
-wget https://nginx.org/download/nginx-1.24.0.tar.gz
-tar -xvf ./nginx-1.24.0.tar.gz
-cd ./nginx-1.24.0

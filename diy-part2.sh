@@ -11,6 +11,7 @@
 #
 # 移除要替换的包
 rm -rf feeds/packages/net/smartdns
+rm -rf feeds/packages/net/mosdns
 
 # 添加温度显示
 sed -i 's/or "1"%>/or "1"%> ( <%=luci.sys.exec("expr `cat \/sys\/class\/thermal\/thermal_zone0\/temp` \/ 1000") or "?"%> \&#8451; ) /g' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
@@ -55,6 +56,10 @@ sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.1/g' target/linux/x86/Makefil
 #添加额外非必须软件包####20230909加入第一行原来是释掉的 
 #git clone https://github.com/pymumu/smartdns.git package/smartdns
 #git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
+
+# MosDNS
+svn export https://github.com/sbwml/luci-app-mosdns/trunk/luci-app-mosdns package/luci-app-mosdns
+svn export https://github.com/sbwml/luci-app-mosdns/trunk/mosdns package/mosdns
 
 #新加入插件第二部分
 pushd package/lean

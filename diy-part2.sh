@@ -58,8 +58,8 @@ sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.1/g' target/linux/x86/Makefil
 #git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
 
 # MosDNS
-svn export https://github.com/sbwml/luci-app-mosdns/trunk/luci-app-mosdns package/luci-app-mosdns
-svn export https://github.com/sbwml/luci-app-mosdns/trunk/mosdns package/mosdns
+#svn export https://github.com/sbwml/luci-app-mosdns/trunk/luci-app-mosdns package/luci-app-mosdns
+#svn export https://github.com/sbwml/luci-app-mosdns/trunk/mosdns package/mosdns
 
 #新加入插件第二部分
 pushd package/lean

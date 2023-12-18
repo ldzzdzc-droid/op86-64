@@ -69,6 +69,6 @@ git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 #git clone --depth=1 https://github.com/vernesong/OpenClash
 #git clone --depth=1 https://github.com/rufengsuixing/luci-app-adguardhome
-cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent
+cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
 popd
 # svn co https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/luci-app-passwall2

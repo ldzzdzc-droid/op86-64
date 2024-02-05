@@ -66,10 +66,8 @@ jobs:
         haskell: true
         large-packages: true
         swap-storage: true    
-
     - name: Checkout
       uses: actions/checkout@main
-      
     - name: Delete Files
       run: |
           docker rmi `docker images -q`

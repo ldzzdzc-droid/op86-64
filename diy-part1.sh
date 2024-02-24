@@ -22,8 +22,8 @@ sed -i '$a src-git lienol https://github.com/Lienol/openwrt-package' feeds.conf.
 sed -i '$a src-git kenzo https://github.com/kenzok8/openwrt-packages' feeds.conf.default
 #sed -i '$a src-git smpackage https://github.com/kenzok8/small-package' feeds.conf.default
 # Add a feed source
-echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;luci-smartdns-dev" >> "feeds.conf.default"
-echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
+echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main' >>feeds.conf.default
+echo 'src-git passwall_luci https://github.com/xiaorouji/openwrt-passwall.git;luci-smartdns-dev' >>feeds.conf.default
 #sed -i "/helloworld/d" "feeds.conf.default"
 #echo "src-git helloworld https://github.com/fw876/helloworld.git;main" >> "feeds.conf.default"
 # echo 'src-git smartdns https://github.com/pymumu/smartdns.git;packages' >>feeds.conf.default

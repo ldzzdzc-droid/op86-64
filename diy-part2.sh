@@ -56,9 +56,10 @@ sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.1/g' target/linux/x86/Makefil
 #添加额外非必须软件包####20230909加入第一行原来是释掉的 
 #git clone https://github.com/pymumu/smartdns.git package/smartdns
 #git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
-git clone https://github.com/kenzok8/openwrt-packages openwrt-packages/luci-app-smartdns
-git clone https://github.com/kenzok8/openwrt-packages.git openwrt-packages/smartdns
+#git clone https://github.com/kenzok8/openwrt-packages openwrt-packages/luci-app-smartdns
+#git clone https://github.com/kenzok8/openwrt-packages.git openwrt-packages/smartdns
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
+merge_package https://github.com/kenzok8/openwrt-packages openwrt-packages/luci-app-smartdns
 
 # MosDNS
 #svn export https://github.com/sbwml/luci-app-mosdns/trunk/luci-app-mosdns package/luci-app-mosdns

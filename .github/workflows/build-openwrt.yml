@@ -89,7 +89,7 @@ jobs:
    
     - name: 更新smartdns、netdata
       run: |
-        WORKINGDIR="`pwd`/feeds/packages/net/smartdns"
+        WORKINGDIR="feeds/packages/net/smartdns"
         mkdir $WORKINGDIR -p
         rm $WORKINGDIR/* -fr
         wget https://github.com/pymumu/openwrt-smartdns/archive/master.zip -O $WORKINGDIR/master.zip
@@ -99,7 +99,7 @@ jobs:
         rm $WORKINGDIR/master.zip
 
         LUCIBRANCH="lede" #更换此变量
-        WORKINGDIR="`pwd`/feeds/luci/applications/luci-app-smartdns"
+        WORKINGDIR="feeds/luci/applications/luci-app-smartdns"
         mkdir $WORKINGDIR -p
         rm $WORKINGDIR/* -fr
         wget https://github.com/pymumu/luci-app-smartdns/archive/${LUCIBRANCH}.zip -O $WORKINGDIR/${LUCIBRANCH}.zip
@@ -107,6 +107,9 @@ jobs:
         mv $WORKINGDIR/luci-app-smartdns-${LUCIBRANCH}/* $WORKINGDIR/
         rmdir $WORKINGDIR/luci-app-smartdns-${LUCIBRANCH}
         rm $WORKINGDIR/${LUCIBRANCH}.zip
+
+        ./scripts/feeds install -a
+        make menuconfig
       
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a

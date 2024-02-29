@@ -59,8 +59,8 @@ git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
 #新加入插件第二部分
 pushd package/lean
 # SmartDNS
-#git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
-#git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
+git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
+git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
 popd

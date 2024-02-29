@@ -106,12 +106,7 @@ jobs:
         mv $WORKINGDIR/luci-app-smartdns-${LUCIBRANCH}/* $WORKINGDIR/
         rmdir $WORKINGDIR/luci-app-smartdns-${LUCIBRANCH}
         rm $WORKINGDIR/${LUCIBRANCH}.zip
-        WORKINGDIR="$OPENWRT_ROOT_PATH/feeds/packages/admin/netdata"
-        mkdir $WORKINGDIR -p
-        rm $WORKINGDIR/* -fr
-        cp -RT $CMZJ_PATCH_ROOT_PATH/netdata $WORKINGDIR
-  
-
+        
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 

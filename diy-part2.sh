@@ -10,7 +10,11 @@
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 # 移除要替换的包
-#rm -rf feeds/packages/net/smartdns
+rm -rf feeds/packages/net/smartdns
+rm -rf feeds/luci/applications/luci-app-smartdns
+cp -rf kenzok8-packages/smartdns package/smartdns
+cp -rf kenzok8-packages/luci-app-smartdns package/luci-app-smartdns
+
 # rm -rf feeds/packages/net/mosdns
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/sbwml/packages_lang_golang -b 22.x feeds/packages/lang/golang
@@ -60,7 +64,8 @@ git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
 #新加入插件第二部分
 pushd package/lean
 # SmartDNS
-git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
+
+#git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
 #git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile

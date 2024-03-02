@@ -10,7 +10,7 @@
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 # 移除要替换的包
-rm -rf feeds/packages/net/smartdns
+#rm -rf feeds/packages/net/smartdns
 # rm -rf feeds/packages/net/mosdns
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/sbwml/packages_lang_golang -b 22.x feeds/packages/lang/golang

@@ -10,11 +10,11 @@
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 # 移除要替换的包
-rm -rf feeds/packages/net/smartdns
-rm -rf feeds/luci/applications/luci-app-smartdns
-git clone --depth=1 https://github.com/kenzok8/openwrt-packages.git kenzok8-packages
-cp -rf kenzok8-packages/smartdns package/smartdns
-cp -rf kenzok8-packages/luci-app-smartdns package/luci-app-smartdns
+#rm -rf feeds/packages/net/smartdns
+#rm -rf feeds/luci/applications/luci-app-smartdns
+#git clone --depth=1 https://github.com/kenzok8/openwrt-packages.git kenzok8-packages
+#cp -rf kenzok8-packages/smartdns package/smartdns
+#cp -rf kenzok8-packages/luci-app-smartdns package/luci-app-smartdns
 
 # rm -rf feeds/packages/net/mosdns
 rm -rf feeds/packages/lang/golang
@@ -49,15 +49,15 @@ git clone https://github.com/openwrt-develop/luci-theme-atmaterial.git package/l
 sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.1/g' target/linux/x86/Makefile
 
 ########### 更新lean的内置的smartdns版本20230909注释掉了 ###########
-#sed -i 's/1.2023.42/1.2024.45/g' feeds/packages/net/smartdns/Makefile
-#sed -i 's/ed102cda03c56e9c63040d33d4a391b56491493e/9ee27e7ba2d9789b7e007410e76c06a957f85e98/g' feeds/packages/net/smartdns/Makefile
-#sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
+sed -i 's/1.2023.42/1.2024.45/g' feeds/packages/net/smartdns/Makefile
+sed -i 's/ed102cda03c56e9c63040d33d4a391b56491493e/9ee27e7ba2d9789b7e007410e76c06a957f85e98/g' feeds/packages/net/smartdns/Makefile
+sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 
 
 #添加额外非必须软件包####20230909加入第一行原来是释掉的 
 #git clone https://github.com/pymumu/smartdns.git package/smartdns
 #git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
-#git clone --branch lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
+git clone --branch lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
 
 #添加大吉
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky

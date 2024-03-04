@@ -57,7 +57,7 @@ sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 #添加额外非必须软件包####20230909加入第一行原来是释掉的 
 #git clone https://github.com/pymumu/smartdns.git package/smartdns
 #git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
-git clone --branch lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
+#git clone --branch lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
 
 #添加大吉
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
@@ -66,7 +66,7 @@ git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
 pushd package/lean
 # SmartDNS
 
-#git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
+git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
 #git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile

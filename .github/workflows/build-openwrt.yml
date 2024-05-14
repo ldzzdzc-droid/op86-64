@@ -40,43 +40,57 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
-    - name: Delete Files
+
+    - name: Check server configuration
+      run: |
+        echo "警告⚠"
+        echo "若分配的服务器性能不足，务必及时取消，重新运行！"
+        echo "已知编译成功CPU型号：8370C,8171M"
+        echo "已知性能不足CPU型号：8272CL"
+        echo -e "-------------- ------------CPU信息------------------------------------------\n"
+        echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
+        echo -e "CPU核心及版本信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo "-------------------------------内存信息-------------------------------------------"
+        echo "已安装内存详细信息："
+        sudo lshw -short -C memory | grep GiB
+        echo -e "\n"
+        echo "-----------------------------硬盘信息---------------------------------------------"
+        echo -e  "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l) \n"
+        echo "硬盘详情："
+        df -Th
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
       run: |
         docker rmi `docker images -q`
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /etc/mysql /etc/php
-        sudo -E apt-get -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snap* || true
-        sudo -E apt-get -qq update
-        sudo -E apt-get -qq install libfuse-dev $(curl -fsSL git.io/depends-ubuntu-2204)
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
+        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android 2>/dev/null
+        sudo -E apt -y purge azure-cli ghc* zulu* texlive* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
+        [[ -n "${AGENT_TOOLSDIRECTORY}" ]] && sudo rm -rf "${AGENT_TOOLSDIRECTORY}"
+        sudo -E apt update
+        sudo -E apt -y install $(curl -fsSL https://is.gd/depends_ubuntu_2204)
+        sudo -E apt -y install clang llvm lld
+        sudo -E apt -y autoremove --purge
+        sudo -E systemctl daemon-reload
+        sudo -E apt clean && sudo -E apt autoclean
         sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
-    - name: Check Space
-      run: |
-          df -h        
-    - name: 释放磁盘空间
-      uses: jlumbroso/free-disk-space@main
-      with:
-        # this might remove tools that are actually needed,
-        # if set to "true" but frees about 6 GB
-        tool-cache: true
-        # all of these default to true, but feel free to set to
-        # "false" if necessary for your workflow
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        swap-storage: true    
-    - name: Checkout
-      uses: actions/checkout@main
+        sudo mkdir -p /mnt/workdir
+        sudo chown $USER:$GROUPS /mnt/workdir
+        echo "status=success" >> ${GITHUB_OUTPUT}
+        df -Th
+
     - name: Clone source code
-      working-directory: /workdir
+      working-directory: /mnt/workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-
+        ln -sf /mnt/workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        cd openwrt
+        useVersionInfo=$(git show -s --date=short --format="Author: %an<br/>date: %cd<br/>commit: %s<br/>commit hash: %H")
+        echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
+        echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+        echo "DATE1=$(date "+%Y-%m-%d")" >> $GITHUB_ENV
+        
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
@@ -86,31 +100,7 @@ jobs:
 
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
-   
-    # - name: 更新smartdns、netdata
-    #  run: |
-    #    WORKINGDIR="feeds/packages/net/smartdns"
-    #    mkdir $WORKINGDIR -p
-    #    rm $WORKINGDIR/* -fr
-    #    wget https://github.com/pymumu/openwrt-smartdns/archive/master.zip -O $WORKINGDIR/master.zip
-    #    unzip $WORKINGDIR/master.zip -d $WORKINGDIR
-    #    mv $WORKINGDIR/openwrt-smartdns-master/* $WORKINGDIR/
-    #    rmdir $WORKINGDIR/openwrt-smartdns-master
-    #    rm $WORKINGDIR/master.zip
-
-    #    LUCIBRANCH="lede" #更换此变量
-    #    WORKINGDIR="feeds/luci/applications/luci-app-smartdns"
-    #    mkdir $WORKINGDIR -p
-    #    rm $WORKINGDIR/* -fr
-    #    wget https://github.com/pymumu/luci-app-smartdns/archive/${LUCIBRANCH}.zip -O $WORKINGDIR/${LUCIBRANCH}.zip
-    #    unzip $WORKINGDIR/${LUCIBRANCH}.zip -d $WORKINGDIR
-    #    mv $WORKINGDIR/luci-app-smartdns-${LUCIBRANCH}/* $WORKINGDIR/
-    #    rmdir $WORKINGDIR/luci-app-smartdns-${LUCIBRANCH}
-    #    rm $WORKINGDIR/${LUCIBRANCH}.zip
-
-    #    ./scripts/feeds install -a
-    #    make menuconfig
-      
+     
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
@@ -137,15 +127,9 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-        
-#    - name: Update toolchain and compile nginx
-#      run: |
-#       cd openwrt
-#       ./scripts/feeds update -a
-#       ./scripts/feeds install -a -p toolchain
-#       make package/nginx/compile V=s
-#       echo "/etc/init.d/nginx enable" >> files/Makefile
-
+        rm -rf $GITHUB_WORKSPACE/.git
+        rm -rf $GITHUB_WORKSPACE/opt
+        df -Th
         
     - name: Compile the firmware
       id: compile
@@ -158,9 +142,13 @@ jobs:
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
-    - name: Check space usage
-      if: (!cancelled())
-      run: df -hT
+    - name: Clean up server space
+      if: steps.compile.outputs.status == 'success' && !cancelled()
+      run: |
+        cd openwrt/
+        rm -rf $(ls . | grep -v "^bin$" | xargs) 2>/dev/null
+        df -hT ${PWD}
+
 
     - name: Upload bin directory
       uses: actions/upload-artifact@main

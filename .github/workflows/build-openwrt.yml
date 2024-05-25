@@ -109,19 +109,14 @@ jobs:
     - name: Compile the firmware
       id: compile
       run: |
-        echo 'ifeq ($(CONFIG_USE_MUSL),y)' > extra.mk
-        echo 'TARGET_CFLAGS += -D_LARGEFILE64_SOURCE' >> extra.mk
-        echo 'endif' >> extra.mk
-        echo 'EXTRA_CFLAGS=$(TARGET_CPPFLAGS)' >> extra.mk
         cd openwrt
-        make -f ../extra.mk
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
-
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        
     - name: Clean up server space
       if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |

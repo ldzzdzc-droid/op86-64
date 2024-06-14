@@ -10,8 +10,8 @@
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 # 移除要替换的包
-rm -rf feeds/packages/net/smartdns
-rm -rf feeds/luci/applications/luci-app-smartdns
+#rm -rf feeds/packages/net/smartdns
+#rm -rf feeds/luci/applications/luci-app-smartdns
 #rm -rf feeds/packages/inotify-tools
 #rm -rf feeds/packages/utils/inotify-tools
 #git clone --depth=1 https://github.com/kenzok8/openwrt-packages.git kenzok8-packages
@@ -57,8 +57,8 @@ sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 
 
 #添加额外非必须软件包####20230909加入第一行原来是释掉的 
-git clone https://github.com/pymumu/smartdns.git package/smartdns
-git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
+#git clone https://github.com/pymumu/smartdns.git package/smartdns
+#git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
 #git clone --branch lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
 
 #添加大吉

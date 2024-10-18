@@ -73,5 +73,29 @@ pushd package/lean
 #git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
-popd
+popd 
+
+# 添加桥接接口
+cat >> package/network/config/firewall/zone.mk <<EOF
+config zone
+	option name 'lan'
+	option network 'lan'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+EOF
+
+# 添加桥接接口
+cat >> package/etc/config/network <<EOF
+config interface 'lan'
+    option type 'bridge'
+    option ifname 'eth0 eth1 eth2 eth3'
+    option proto 'static'
+    option ipaddr '10.0.0.19'
+    option netmask '255.255.255.0'
+EOF
+
+# 移除WAN口配置
+sed -i '/config interface 'wan'/d' package/etc/config/network
+
 

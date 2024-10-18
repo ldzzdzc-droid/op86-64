@@ -26,7 +26,7 @@ git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
 sed -i 's/or "1"%>/or "1"%> ( <%=luci.sys.exec("expr `cat \/sys\/class\/thermal\/thermal_zone0\/temp` \/ 1000") or "?"%> \&#8451; ) /g' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 
 # Modify default IP
-sed -i 's/192.168.1.1/10.0.0.5/g' package/base-files/files/bin/config_generate
+sed -i 's/192.168.1.1/10.0.0.10/g' package/base-files/files/bin/config_generate
 
 # 修改输出文件名
 sed -i 's/IMG_PREFIX:=$(VERSION_DIST_SANITIZED)/IMG_PREFIX:=full-$(shell date +%Y%m%d)-$(VERSION_DIST_SANITIZED)/g' include/image.mk

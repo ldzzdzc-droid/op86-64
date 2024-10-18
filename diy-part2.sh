@@ -75,24 +75,18 @@ git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
 popd 
 
-# 添加桥接接口
-cat >> package/network/config/firewall/zone.mk <<EOF
-config zone
-	option name 'lan'
-	option network 'lan'
-	option input 'ACCEPT'
-	option output 'ACCEPT'
-	option forward 'REJECT'
-EOF
 
-# 添加桥接接口
-cat >> package/etc/config/network <<EOF
-config interface 'lan'
-    option type 'bridge'
-    option ifname 'eth0 eth1 eth2 eth3'
-    option proto 'static'
-    option ipaddr '10.0.0.19'
-    option netmask '255.255.255.0'
+# 设置桥接接口
+cat >> package/network/config/firewall/files/firewall.user <<EOF
+# 创建桥接接口
+brctl addbr br-lan
+brctl addif br-lan eth0
+brctl addif br-lan eth1
+brctl addif br-lan eth2
+brctl addif br-lan eth3
+
+# 启动桥接接口
+ifconfig br-lan up
 EOF
 
 # 移除WAN口配置

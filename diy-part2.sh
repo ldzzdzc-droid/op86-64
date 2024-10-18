@@ -89,7 +89,5 @@ brctl addif br-lan eth3
 ifconfig br-lan up
 EOF
 
-# 移除WAN口配置
-sed -i '/config interface 'wan'/d' package/etc/config/network
 
 

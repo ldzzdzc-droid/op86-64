@@ -75,19 +75,3 @@ git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
 popd 
 
-
-# 设置桥接接口
-cat >> package/network/config/firewall/files/firewall.user <<EOF
-# 创建桥接接口
-brctl addbr br-lan
-brctl addif br-lan eth0
-brctl addif br-lan eth1
-brctl addif br-lan eth2
-brctl addif br-lan eth3
-
-# 启动桥接接口
-ifconfig br-lan up
-EOF
-
-
-

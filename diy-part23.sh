@@ -35,28 +35,6 @@ sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/emortal/autocore/f
 #修正连接数（by ベ七秒鱼ベ）
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
 
-#修复NAT回流
-#sed -i '/customized in this file/a net.bridge.bridge-nf-call-arptables=0' package/base-files/files/etc/sysctl.conf
-#sed -i '/customized in this file/a net.bridge.bridge-nf-call-ip6tables=0' package/base-files/files/etc/sysctl.conf
-#sed -i '/customized in this file/a net.bridge.bridge-nf-call-iptables=0' package/base-files/files/etc/sysctl.conf
-
-#PVE VirtIO半虚拟网卡状态页显示半双工修改
-#sed -i '/exit 0/i ethtool -s eth0 speed 2500 duplex full\nethtool -s eth1 speed 2500 duplex full' package/base-files/files/etc/rc.local
-
-# 设置ttyd免帐号登录
-#uci set ttyd.@ttyd[0].command='/bin/login -f root'
-#uci commit ttyd
-
-#nlbwmon 修复log警报
-#sed -i '/customized in this file/a net.core.rmem_default=16777216' package/base-files/files/etc/sysctl.conf
-#sed -i '/customized in this file/a net.core.wmem_default=16777216' package/base-files/files/etc/sysctl.conf
-#sed -i '/customized in this file/a net.core.rmem_max=16777216' package/base-files/files/etc/sysctl.conf
-#sed -i '/customized in this file/a net.core.wmem_max=16777216' package/base-files/files/etc/sysctl.conf
-
-# MSD组播转换luci
-rm -rf feeds/luci/applications/luci-app-msd_lite
-git clone https://github.com/lwb1978/luci-app-msd_lite package/luci-app-msd_lite
-
 # 替换udpxy为修改版，解决组播源数据有重复数据包导致的花屏和马赛克问题
 rm -rf feeds/packages/net/udpxy/Makefile
 cp -f ${GITHUB_WORKSPACE}/patches/udpxy/Makefile feeds/packages/net/udpxy/

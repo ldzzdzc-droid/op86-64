@@ -13,11 +13,6 @@ name: Build immortalwrt_23.05
 on:
   repository_dispatch:
   workflow_dispatch:
-    inputs:
-      ssh:
-        description: 'SSH connection to Actions'
-        required: false
-        default: 'false'
 
 # 每周三 执行编译
 #  schedule:

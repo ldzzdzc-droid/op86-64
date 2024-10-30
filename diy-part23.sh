@@ -75,53 +75,12 @@ rm -rf package/network/services/ppp
 git clone https://github.com/sbwml/package_network_services_ppp package/network/services/ppp
 echo "ppp 插件切换完成"
 
-# IPSet(Lean源码已跟进)
-#rm -rf package/network/utils/ipset
-#merge_commits main https://github.com/openwrt/openwrt 9f6a28b91e30de9c6875afbe1493934218dbfb49 package/network/utils package/network/utils/ipset
-#echo "IPSet 插件切换完成"
-
 #改用MosDNS源码：
 rm -rf feeds/small/luci-app-mosdns
 rm -rf feeds/small/v2ray-geodata
 git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 echo "MosDNS 插件切换完成"
-
-# SmartDNS
-#rm -rf feeds/luci/applications/luci-app-smartdns
-#git clone --single-branch https://github.com/lwb1978/luci-app-smartdns package/luci-app-smartdns
-# 替换immortalwrt 软件仓库smartdns版本为官方最新版
-#rm -rf feeds/packages/net/smartdns
-#cp -rf ${GITHUB_WORKSPACE}/patch/smartdns feeds/packages/net
-#echo "SmartDNS 插件切换完成"
-
-#Miniupnpd 替换 (ImmortalWRT源码用)
-#rm -rf feeds/packages/net/miniupnpd
-#merge_folder master https://github.com/coolsnowwolf/packages feeds/packages/net net/miniupnpd
-#echo "Miniupnpd 插件切换完成"
-
-#Dnsmasq 版本替换
-#rm -rf package/network/services/dnsmasq
-#merge_folder master https://github.com/coolsnowwolf/lede package/network/services package/network/services/dnsmasq
-#echo "Dnsmasq 插件切换完成"
-
-# OpenSSL
-#pushd package/libs/openssl
-#git checkout 4fd8d7b7f8b7752ba8bb06e0d43808d0c5fddde0
-#popd
-#echo "OpenSSL 插件切换完成"
-
-# Curl
-#sed -i 's/PKG_VERSION:=.*/PKG_VERSION:=8.5.0/g' feeds/packages/net/curl/Makefile
-#sed -i 's/PKG_HASH:=.*/PKG_HASH:=ce4b6a6655431147624aaf582632a36fe1ade262d5fab385c60f78942dd8d87b/g' feeds/packages/net/curl/Makefile
-#sed -i 's/PKG_RELEASE:=.*/PKG_RELEASE:=1/g' feeds/packages/net/curl/Makefile
-#echo "Curl 插件切换完成"
-
-# GN
-#sed -i 's/PKG_SOURCE_DATE:=.*/PKG_SOURCE_DATE:=2023-11-17/g' feeds/small/gn/Makefile
-#sed -i 's/PKG_SOURCE_VERSION:=.*/PKG_SOURCE_VERSION:=7367b0df0a0aa25440303998d54045bda73935a5/g' feeds/small/gn/Makefile
-#sed -i 's/PKG_MIRROR_HASH:=.*/PKG_MIRROR_HASH:=c11eb62d257f9e41d29139d66e94d3798b013a650dd493ae8759c57e2e64cfd1/g' feeds/small/gn/Makefile
-#echo "GN 插件切换完成"
 
 # 替换curl修改版（无nghttp3、ngtcp2）
 curl_ver=$(cat feeds/packages/net/curl/Makefile | grep -i "PKG_VERSION:=" | awk 'BEGIN{FS="="};{print $2}')
@@ -196,9 +155,6 @@ rm -rf feeds/kenzo/luci-app-argon-config
 rm -rf feeds/kenzo/luci-theme-argon
 rm -rf feeds/luci/themes/luci-theme-argon
 merge_folder main https://github.com/sbwml/luci-theme-argon package/openwrt-packages luci-app-argon-config luci-theme-argon
-#
-# git clone https://github.com/xiaoqingfengATGH/luci-theme-infinityfreedom.git package/luci-theme-infinityfreedom
-# git clone https://github.com/Leo-Jo-My/luci-theme-opentomcat.git package/luci-theme-opentomcat
 
 # 取消自添加主题的默认设置
 # find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
@@ -226,12 +182,4 @@ merge_folder main https://github.com/sbwml/luci-theme-argon package/openwrt-pack
 #添加大吉
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
 
-#新加入插件第二部分
-pushd package/lean
-# SmartDNS
-
-#git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
-#git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
-cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
-popd 

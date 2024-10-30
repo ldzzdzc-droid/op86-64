@@ -41,7 +41,7 @@ sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' packag
 #sed -i '/customized in this file/a net.bridge.bridge-nf-call-iptables=0' package/base-files/files/etc/sysctl.conf
 
 #PVE VirtIO半虚拟网卡状态页显示半双工修改
-sed -i '/exit 0/i ethtool -s eth0 speed 2500 duplex full\nethtool -s eth1 speed 2500 duplex full' package/base-files/files/etc/rc.local
+#sed -i '/exit 0/i ethtool -s eth0 speed 2500 duplex full\nethtool -s eth1 speed 2500 duplex full' package/base-files/files/etc/rc.local
 
 # 设置ttyd免帐号登录
 #uci set ttyd.@ttyd[0].command='/bin/login -f root'
@@ -250,3 +250,15 @@ merge_folder main https://github.com/sbwml/luci-theme-argon package/openwrt-pack
 #echo 'refresh feeds'
 #./scripts/feeds update -a
 #./scripts/feeds install -a
+#添加大吉
+git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
+
+#新加入插件第二部分
+pushd package/lean
+# SmartDNS
+
+#git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
+#git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
+git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
+cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
+popd 

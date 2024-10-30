@@ -181,5 +181,3 @@ merge_folder main https://github.com/sbwml/luci-theme-argon package/openwrt-pack
 #./scripts/feeds install -a
 #添加大吉
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
-
-git clone --depth=1 https://github.com/lisaac/luci-app-dockerman

@@ -9,11 +9,11 @@
 # File name: diy-part2.sh
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
-echo "开始 DIY2 配置……"
-echo "========================="
+#echo "开始 DIY2 配置……"
+#echo "========================="
 
-chmod +x ${GITHUB_WORKSPACE}/scripts/function.sh
-source ${GITHUB_WORKSPACE}/scripts/function.sh
+#chmod +x ${GITHUB_WORKSPACE}/scripts/function.sh
+#source ${GITHUB_WORKSPACE}/scripts/function.sh
 
 # merge_folder 拉取指定文件夹操作 示例：
 # 参数1是分支名，参数2是库地址，参数3是所有文件下载到指定路径，参数4是指定要下载的包文件夹。

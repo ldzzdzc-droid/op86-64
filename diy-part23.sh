@@ -58,6 +58,8 @@ echo "Golang 插件切换完成"
 #rm -rf feeds/packages/net/{xray-core,v2ray-core,v2ray-geodata,sing-box,pdnsd-alt,brook,chinadns-ng,dns2socks,dns2tcp,gn,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan,trojan-go,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,gn}
 #rm -rf feeds/small/{xray-core,v2ray-core,v2ray-geodata,sing-box,pdnsd-alt,brook,chinadns-ng,dns2socks,dns2tcp,gn,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan,trojan-go,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,gn}
 # 核心库
+git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall.git
+git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall-packages.git
 # ------------------------------------------------------------
 echo "PassWall 插件切换完成"
 

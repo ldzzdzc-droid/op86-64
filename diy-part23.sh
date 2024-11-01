@@ -138,20 +138,6 @@ popd
 # 修复编译时提示 freeswitch 缺少 libpcre 依赖
 sed -i 's/+libpcre \\$/+libpcre2 \\/g' package/feeds/telephony/freeswitch/Makefile
 
-# 添加主题
-# argon
-rm -rf feeds/kenzo/luci-app-argon-config
-rm -rf feeds/kenzo/luci-theme-argon
-rm -rf feeds/luci/themes/luci-theme-argon
-merge_folder main https://github.com/sbwml/luci-theme-argon package/openwrt-packages luci-app-argon-config luci-theme-argon
-
-# 取消自添加主题的默认设置
-# find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
-
-# 设置默认主题
-# default_theme='Argon'
-# sed -i "s/bootstrap/$default_theme/g" feeds/luci/modules/luci-base/root/etc/config/luci
-
 # 其他软件包
 # git clone https://github.com/rufengsuixing/luci-app-adguardhome.git package/luci-app-adguardhome
 # git clone https://github.com/vernesong/OpenClash.git package/OpenClash
@@ -170,5 +156,3 @@ merge_folder main https://github.com/sbwml/luci-theme-argon package/openwrt-pack
 #./scripts/feeds install -a
 #添加大吉
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
-
-cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile

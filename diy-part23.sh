@@ -43,7 +43,6 @@ cp -f ${GITHUB_WORKSPACE}/patches/udpxy/Makefile feeds/packages/net/udpxy/
 
 # 移除要替换的包
 rm -rf feeds/luci/applications/luci-app-mosdns
-rm -rf feeds/packages/net/{alist,adguardhome,mosdns,xray*,v2ray*,v2ray*,sing*,smartdns}
 rm -rf feeds/packages/utils/v2dat
 rm -rf feeds/packages/lang/golang
 
@@ -54,10 +53,6 @@ git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
 echo "Golang 插件切换完成"
 
 # ------------------PassWall 科学上网--------------------------
-# 移除 openwrt feeds 自带的核心库
-#rm -rf feeds/packages/net/{xray-core,v2ray-core,v2ray-geodata,sing-box,pdnsd-alt,brook,chinadns-ng,dns2socks,dns2tcp,gn,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan,trojan-go,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,gn}
-#rm -rf feeds/small/{xray-core,v2ray-core,v2ray-geodata,sing-box,pdnsd-alt,brook,chinadns-ng,dns2socks,dns2tcp,gn,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan,trojan-go,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,gn}
-# 核心库
 git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall.git
 git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall-packages.git
 # ------------------------------------------------------------

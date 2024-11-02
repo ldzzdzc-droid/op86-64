@@ -52,6 +52,8 @@ sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
 # 克隆openwrt-passwall仓库
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages.git
+# git clone https://github.com/xiaorouji/openwrt-passwall-packages.git package/openwrt-passwall
+git clone https://github.com/xiaorouji/openwrt-passwall.git package/passwall
 cp -rf openwrt-passwall-packages/chinadns-ng package/chinadns-ng
 cp -rf openwrt-passwall-packages/tcping package/tcping
 cp -rf openwrt-passwall-packages/trojan-go package/trojan-go

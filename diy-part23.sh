@@ -47,8 +47,8 @@ git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
 echo "Golang 插件切换完成"
 
 # ------------------PassWall 科学上网--------------------------
-git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall.git
-git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall-packages.git
+git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
+git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 # ------------------------------------------------------------
 echo "PassWall 插件切换完成"
 

@@ -30,7 +30,10 @@ popd
 #修正连接数
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
 
-# ##themes添加（svn co 命令意思：指定版本如https://github）
+# passwall
+rm -rf feeds/luci/applications/luci-app-passwall/
+rm -rf feeds/packages/net/xray-core/
+rm -rf feeds/packages/net/xray-plugin/
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 
@@ -50,19 +53,7 @@ sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 
 #添加大吉
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
-# 克隆openwrt-passwall仓库
-#git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages.git
-#git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
-#git clone --depth=1 -b luci-smartdns-dev https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
-#cp -rf openwrt-passwall-packages/chinadns-ng package/chinadns-ng
-#cp -rf openwrt-passwall-packages/tcping package/tcping
-#cp -rf openwrt-passwall-packages/trojan-go package/trojan-go
-#cp -rf openwrt-passwall-packages/trojan-plus package/trojan-plus
-#cp -rf openwrt-passwall-packages/ssocks package/ssocks
-#cp -rf openwrt-passwall-packages/hysteria package/hysteria
-#cp -rf openwrt-passwall-packages/dns2tcp package/dns2tcp
-#cp -rf openwrt-passwall-packages/sing-box package/sing-box
-#rm -rf openwrt-passwall-packages
+
 #新加入插件第二部分
 pushd package/lean
 # SmartDNS

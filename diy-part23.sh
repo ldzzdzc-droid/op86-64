@@ -4,10 +4,24 @@
 sed -i 's/192.168.1.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 sed -i 's/192.168.10.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 
-########### 更新lean的内置的smartdns版本20230909注释掉了 ###########
-sed -i 's/1.2023.42/1.2024.46/g' feeds/packages/net/smartdns/Makefile
-sed -i 's/ed102cda03c56e9c63040d33d4a391b56491493e/07c13827bb523519a638214ed7ad76180f71a40a/g' feeds/packages/net/smartdns/Makefile
-sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
+# 修改 SmartDNS 编译参数（通用路径适配）
+SMARTDNS_MAKEFILE_PATH=$(find feeds/ -path '*/net/smartdns/Makefile' -print -quit)
+
+if [ -n "$SMARTDNS_MAKEFILE_PATH" ]; then
+    # 修改版本号 (示例：1.2023.42 → 1.2024.46)
+    sed -i 's/PKG_VERSION:=1\.2023\.42/PKG_VERSION:=1.2024.46/' $SMARTDNS_MAKEFILE_PATH
+
+    # 修改提交哈希 (示例：ed102cda → 07c13827)
+    sed -i 's/PKG_SOURCE_VERSION:=ed102cda03c56e9c63040d33d4a391b56491493e/PKG_SOURCE_VERSION:=07c13827bb523519a638214ed7ad76180f71a40a/' $SMARTDNS_MAKEFILE_PATH
+
+    # 禁用哈希校验
+    sed -i 's/^PKG_MIRROR_HASH/#PKG_MIRROR_HASH/' $SMARTDNS_MAKEFILE_PATH
+
+    # 添加架构优化参数
+    sed -i '/define Package\/smartdns\/config/a\    config SMARTDNS_ARCH\n        string\n        default "x86_64" if x86_64' $SMARTDNS_MAKEFILE_PATH
+else
+    echo "Warning: SmartDNS Makefile not found in feeds!"
+fi
 
 # IPv6 Configuration
 cat << EOF >> package/base-files/files/etc/config/network

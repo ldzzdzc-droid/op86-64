@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# 确保 smartdns 源码已拉取
+git clone https://github.com/pymumu/smartdns.git package/smartdns
 # Add third-party feeds
 echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> feeds.conf.default
 echo "src-git adguardhome https://github.com/rufengsuixing/luci-app-adguardhome.git;master" >> feeds.conf.default

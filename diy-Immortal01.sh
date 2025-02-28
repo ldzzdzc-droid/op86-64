@@ -5,6 +5,7 @@ git clone https://github.com/pymumu/smartdns.git package/smartdns
 # Add third-party feeds
 echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> feeds.conf.default
 echo "src-git smartdns https://github.com/pymumu/smartdns.git;master" >> feeds.conf.default
+echo 'src-git smartdns_luci https://github.com/pymumu/luci-app-smartdns.git;lede' >>feeds.conf.default
 echo "src-git lucky https://github.com/sirpdboy/luci-app-lucky.git;main" >> feeds.conf.default
 # 使用兼容性更好的 AdGuardHome 源
 echo "src-git adguardhome https://github.com/kenzok8/openwrt-packages.git;master" >> feeds.conf.default

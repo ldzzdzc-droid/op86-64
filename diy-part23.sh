@@ -4,6 +4,11 @@
 sed -i 's/192.168.1.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 sed -i 's/192.168.10.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 
+########### 更新lean的内置的smartdns版本20230909注释掉了 ###########
+sed -i 's/1.2023.42/1.2024.46/g' feeds/packages/net/smartdns/Makefile
+sed -i 's/ed102cda03c56e9c63040d33d4a391b56491493e/07c13827bb523519a638214ed7ad76180f71a40a/g' feeds/packages/net/smartdns/Makefile
+sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
+
 # IPv6 Configuration
 cat << EOF >> package/base-files/files/etc/config/network
 config interface 'lan'

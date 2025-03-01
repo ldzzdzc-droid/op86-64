@@ -1,52 +1,59 @@
-name: OpenWrt-ImmortalWrt-24.10-Compiler
+name: Build ImmortalWrt 24.10
+
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'immortal24.10-*'
+    branches: [main]
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
+  REPO_BRANCH: openwrt-24.10
   CONFIG_FILE: immortal24.10.config
-  TZ: Asia/Shanghai
+  DIY_P1: diy-24.10-part1.sh
+  DIY_P2: diy-24.10-part2.sh
 
 jobs:
-  build-openwrt:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+
     steps:
-      # 步骤1：检出仓库代码
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      # 步骤2：初始化编译环境
-      - name: Setup Build Environment
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y build-essential clang flex g++ gawk gcc-multilib \
-          gettext git libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        xargs -a depends-24.10.txt sudo apt-get install -y
 
-      # 步骤3：加载指定配置文件
-      - name: Apply Custom Configuration
-        run: |
-          if [ -f "$CONFIG_FILE" ]; then
-            cp $CONFIG_FILE .config
-            make defconfig
-          else
-            echo "❌ 配置文件 $CONFIG_FILE 未找到，终止编译流程"
-            exit 1
-          fi
+    - name: Clone Source
+      run: |
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        cp $CONFIG_FILE openwrt/.config
+        cp $DIY_P1 openwrt/
+        cp $DIY_P2 openwrt/
 
-      # 步骤4：内核编译与固件生成
-      - name: Build Firmware
-        run: |
-          make -j$(nproc) download
-          make -j$(nproc) || make -j1 V=s
+    - name: Apply Custom Scripts
+      working-directory: openwrt
+      run: |
+        chmod +x ../$DIY_P1 ../$DIY_P2
+        ../$DIY_P1
+        ../$DIY_P2
 
-      # 步骤5：产物归档
-      - name: Archive Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: immortalwrt-24.10-binaries
-          path: bin/targets/*/*
+    - name: Download Packages
+      working-directory: openwrt
+      run: |
+        make -j$(nproc) download || make -j1 V=s download
+        find dl -size -1024c -delete  # 清理无效文件
+
+    - name: Compile Firmware
+      working-directory: openwrt
+      run: |
+        make -j$(($(nproc) + 1)) || make -j1 V=s
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: immortalwrt-24.10-bin
+        path: openwrt/bin/targets/x86/64/
+        retention-days: 7

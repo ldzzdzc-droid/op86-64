@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# 强制清理 PATH
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
 # 设置默认 IP
 sed -i 's/192.168.1.1/10.0.0.8/g; s/192.168.10.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 

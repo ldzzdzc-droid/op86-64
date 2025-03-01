@@ -1,0 +1,48 @@
+name: Build OpenWrt 24.10
+
+on: [workflow_dispatch]
+
+env:
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  REPO_BRANCH: openwrt-24.10
+  CONFIG_FILE: .config
+  DIY_P1: diy-24.10-part1.sh
+  DIY_P2: diy-24.10-part2.sh
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        xargs -a depends-24.10.txt sudo apt-get install -y
+
+    - name: Prepare Sources
+      run: |
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        cp $CONFIG_FILE openwrt/.config
+        cp $DIY_P1 openwrt/
+        cp $DIY_P2 openwrt/
+
+    - name: Apply Customizations
+      working-directory: openwrt
+      run: |
+        chmod +x ../$DIY_P1 ../$DIY_P2
+        ../$DIY_P1
+        ../$DIY_P2
+
+    - name: Compile Firmware
+      working-directory: openwrt
+      run: |
+        make -j$(nproc) download
+        make -j$(($(nproc) + 1)) || make -j1 V=s
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: openwrt-24.10-bin
+        path: openwrt/bin/targets/x86/64/

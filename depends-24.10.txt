@@ -1,0 +1,13 @@
+build-essential
+clang-16
+lld-16
+python3.12
+python3.12-dev
+rsync
+curl
+libncurses6-dev
+libssl-dev
+zlib1g-dev
+gawk
+gettext
+subversion

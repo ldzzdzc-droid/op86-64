@@ -67,10 +67,11 @@ jobs:
       env:
         CC: clang
         CXX: clang++
-        PATH: "/usr/lib/llvm-16/bin:/usr/bin:/bin:$PATH"
+        PATH: "/usr/lib/llvm-16/bin:/usr/bin:/bin:/usr/sbin:/sbin"  # 严格限制路径
       run: |
+        echo "Cleaned PATH: $PATH"
         make -j$(($(nproc) + 1)) || make -j1 V=s
-
+        
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:

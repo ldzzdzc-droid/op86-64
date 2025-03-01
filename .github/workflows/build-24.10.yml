@@ -18,50 +18,37 @@ jobs:
     timeout-minutes: 240
 
     steps:
-    - name: Checkout Repository
+    # 关键修复：先检出用户仓库
+    - name: Checkout Configuration Files
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0
+        path: config-repo
 
     - name: Setup Toolchains
       run: |
-        # 添加 LLVM 16 官方源
         wget https://apt.llvm.org/llvm.sh
         chmod +x llvm.sh
         sudo ./llvm.sh 16
-        # 添加 Python 3.12 源
         sudo add-apt-repository ppa:deadsnakes/ppa -y
-        # 更新源
         sudo apt-get update -y
+        sudo apt-get install -y clang-16 lld-16 python3.12
 
-    - name: Install Dependencies
-      run: |
-        # 安装新版工具链
-        sudo apt-get install -y \
-          clang-16 lld-16 lldb-16 \
-          python3.12 python3.12-dev \
-          libpython3.12-dev
-        # 安装基础依赖
-        xargs -a depends-24.10.txt sudo apt-get install -y
-        # 创建符号链接
-        sudo ln -sf /usr/bin/clang-16 /usr/bin/clang
-        sudo ln -sf /usr/bin/clang++-16 /usr/bin/clang++
-
-    - name: Clone Source Code
+    - name: Clone ImmortalWrt Source
       run: |
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        cp $CONFIG_FILE openwrt/.config
-        cp $DIY_P1 openwrt/
-        cp $DIY_P2 openwrt/
+        # 从用户配置目录复制文件
+        cp config-repo/$CONFIG_FILE openwrt/.config
+        cp config-repo/$DIY_P1 openwrt/
+        cp config-repo/$DIY_P2 openwrt/
 
     - name: Apply Custom Scripts
       working-directory: openwrt
       run: |
-        chmod +x ../$DIY_P1 ../$DIY_P2
-        ../$DIY_P1
-        ../$DIY_P2
+        chmod +x $DIY_P1 $DIY_P2
+        ./$DIY_P1
+        ./$DIY_P2
 
-    - name: Download Packages
+       - name: Download Packages
       working-directory: openwrt
       run: |
         make -j$(nproc) download || make -j1 V=s download

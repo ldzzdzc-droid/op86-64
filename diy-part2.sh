@@ -1,7 +1,13 @@
 #!/bin/bash
 #
 # Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
-#
+# 确保 files 目录存在
+mkdir -p files/etc/init.d
+mkdir -p files/etc/rc.d
+mkdir -p files/etc/config
+mkdir -p files/etc/uci-defaults
+mkdir -p files/var/lib/docker
+mkdir -p files/mnt/sda3/downloads
 # This is free software, licensed under the MIT License.
 # See /LICENSE for more information.
 #
@@ -29,10 +35,6 @@ popd
 #sed -i 's/luci-theme-bootstrap/luci-theme-Argon/g' feeds/luci/collections/luci/Makefile
 #修正连接数
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
-
-# 确保 Docker 数据目录存在
-mkdir -p files/var/lib/docker
-chmod 755 files/var/lib/docker
 
 # 修复 Docker 服务启动顺序
 cat << 'EOF' > files/etc/init.d/dockerd
@@ -69,6 +71,69 @@ chmod +x files/etc/init.d/dockerd
 # 添加 Docker 自启动
 ln -sf ../init.d/dockerd files/etc/rc.d/S99dockerd
 
+# 确保 Docker 数据目录在升级时保留
+echo "/var/lib/docker" >> files/etc/sysupgrade.conf
+
+# 创建 qBittorrent 数据目录
+mkdir -p files/etc/qBittorrent
+chmod 755 files/etc/qBittorrent
+
+# 修改 qBittorrent 配置文件路径
+cat << 'EOF' > files/etc/config/qbittorrent
+config qbittorrent
+    option enabled '1'
+    option config_dir '/etc/qBittorrent'
+    option download_dir '/mnt/sda3/downloads'
+EOF
+
+# 确保数据目录在升级时保留
+echo "/etc/qBittorrent" >> files/etc/sysupgrade.conf
+echo "/mnt/sda3" >> files/etc/sysupgrade.conf
+
+# 添加 qBittorrent 数据迁移脚本
+cat << 'EOF' > files/etc/uci-defaults/99-migrate-qbittorrent-data
+#!/bin/sh
+
+# 创建下载目录
+mkdir -p /mnt/sda3/downloads
+chmod 755 /mnt/sda3/downloads
+
+# 迁移旧数据（如果存在）
+if [ -d /opt/qBittorrent/qBittorrent ] && [ ! -d /etc/qBittorrent ]; then
+    mv /opt/qBittorrent/qBittorrent /etc/qBittorrent
+    ln -s /etc/qBittorrent /opt/qBittorrent/qBittorrent
+fi
+
+# 迁移旧下载数据（如果存在）
+if [ -d /mnt/sda1/downloads ] && [ ! -d /mnt/sda3/downloads ]; then
+    mv /mnt/sda1/downloads /mnt/sda3/downloads
+fi
+
+exit 0
+EOF
+
+# 设置脚本权限
+chmod +x files/etc/uci-defaults/99-migrate-qbittorrent-data
+
+# 配置外部存储挂载
+cat << 'EOF' > files/etc/config/fstab
+config global
+    option anon_swap '0'
+    option anon_mount '0'
+    option auto_swap '1'
+    option auto_mount '1'
+    option delay_root '5'
+    option check_fs '0'
+
+config mount
+    option target '/mnt/sda3'
+    option device '/dev/sda3'
+    option fstype 'ext4'
+    option options 'rw,noatime'
+    option enabled '1'
+    option enabled_fsck '0'
+EOF
+
 # passwall
 rm -rf feeds/luci/applications/luci-app-passwall/
 rm -rf feeds/packages/net/xray-core/
@@ -103,56 +168,4 @@ git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 #cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
 popd 
 
-# 确保 Docker 数据目录在升级时保留
-echo "/var/lib/docker" >> files/etc/sysupgrade.conf
 
-# 创建 qBittorrent 数据目录
-mkdir -p files/etc/qBittorrent
-chmod 755 files/etc/qBittorrent
-
-# 修改 qBittorrent 配置文件路径
-cat << 'EOF' > files/etc/config/qbittorrent
-config qbittorrent
-    option enabled '1'
-    option config_dir '/etc/qBittorrent'
-    option download_dir '/mnt/sda1/downloads'
-EOF
-
-# 确保数据目录在升级时保留
-echo "/etc/qBittorrent" >> files/etc/sysupgrade.conf
-echo "/mnt/sda1/downloads" >> files/etc/sysupgrade.conf
-
-# 添加 qBittorrent 数据迁移脚本
-cat << 'EOF' > files/etc/uci-defaults/99-migrate-qbittorrent-data
-#!/bin/sh
-
-# 迁移旧数据（如果存在）
-if [ -d /opt/qBittorrent/qBittorrent ] && [ ! -d /etc/qBittorrent ]; then
-    mv /opt/qBittorrent/qBittorrent /etc/qBittorrent
-    ln -s /etc/qBittorrent /opt/qBittorrent/qBittorrent
-fi
-
-exit 0
-EOF
-
-# 设置脚本权限
-chmod +x files/etc/uci-defaults/99-migrate-qbittorrent-data
-
-# 配置外部存储挂载
-cat << 'EOF' > files/etc/config/fstab
-config global
-    option anon_swap '0'
-    option anon_mount '0'
-    option auto_swap '1'
-    option auto_mount '1'
-    option delay_root '5'
-    option check_fs '0'
-
-config mount
-    option target '/mnt/sda1'
-    option device '/dev/sda1'
-    option fstype 'ext4'
-    option options 'rw,noatime'
-    option enabled '1'
-    option enabled_fsck '0'
-EOF

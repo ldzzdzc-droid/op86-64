@@ -41,12 +41,7 @@ jobs:
     - name: Free Disk Space (Ubuntu)
       uses: jlumbroso/free-disk-space@main
       with:
-        # this might remove tools that are actually needed,
-        # if set to "true" but frees about 6 GB
         tool-cache: true
-        
-        # all of these default to true, but feel free to set to
-        # "false" if necessary for your workflow
         android: true
         dotnet: true
         haskell: true
@@ -76,7 +71,7 @@ jobs:
       run: |
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
-        sudo -E apt-get -yqq install $(cat $GITHUB_WORKSPACE/depends-ubuntu-2204)
+        sudo -E apt-get -yqq install $(cat $GITHUB_WORKSPACE/depends-Ubuntu-2204)
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
@@ -117,8 +112,10 @@ jobs:
         cd openwrt
         make defconfig
         make download -j8
-        find dl -size -1024c -exec ls -l {} \;
+        # 清理下载目录中的小文件和临时文件
         find dl -size -1024c -exec rm -f {} \;
+        find dl -name "*.tmp" -exec rm -f {} \;
+        find dl -name "*.cache" -exec rm -f {} \;
 
     - name: Compile the firmware
       id: compile
@@ -135,6 +132,12 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
+    - name: Clean up bin directory (remove packages)
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      run: |
+        # 在上传 bin 目录之前移除 packages 文件夹
+        rm -rf openwrt/bin/targets/*/*/packages
+
     - name: Upload bin directory
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
@@ -147,12 +150,8 @@ jobs:
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        rm -rf packages && mkdir packages
-        find -name "*profiles.json*" | xargs -i mv -f {} packages
-        find -name "*.buildinfo*" | xargs -i mv -f {} packages
-        find -name "*kernel.bin*" | xargs -i mv -f {} packages
-        find -name "*rootfs.img.gz*" | xargs -i mv -f {} packages
-        find -name "*generic.manifest*" | xargs -i mv -f {} packages
+        # 移除 packages 文件夹，不再创建
+        rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
@@ -171,16 +170,14 @@ jobs:
         touch release.txt
         [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
         [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
-         echo "status=success" >> $GITHUB_OUTPUT
+        echo "status=success" >> $GITHUB_OUTPUT
 
-      
     - name: Delete releases and workflows runs
       uses: ophub/delete-releases-workflows@main
       with:
         delete_releases: true
-        releases_keep_latest: 10
+        releases_keep_latest: 5  # 减少保留的版本数量，节省空间
         delete_tags: true
         delete_workflows: true
-        workflows_keep_day: 60
+        workflows_keep_day: 30  # 减少保留天数，节省空间
         gh_token: ${{ secrets.GITHUB_TOKEN }}
-        

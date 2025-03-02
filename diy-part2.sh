@@ -30,6 +30,45 @@ popd
 #修正连接数
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
 
+# 确保 Docker 数据目录存在
+mkdir -p files/var/lib/docker
+chmod 755 files/var/lib/docker
+
+# 修复 Docker 服务启动顺序
+cat << 'EOF' > files/etc/init.d/dockerd
+#!/bin/sh /etc/rc.common
+
+START=99
+STOP=10
+
+SERVICE_USE_PID=1
+SERVICE_WRITE_PID=1
+SERVICE_DAEMONIZE=1
+
+start() {
+    # 等待网络和存储服务就绪
+    while ! ping -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; do
+        sleep 1
+    done
+
+    # 确保挂载点可用
+    mount -o remount,rw /var/lib/docker || mkdir -p /var/lib/docker
+
+    # 启动 Docker
+    service_start /usr/bin/dockerd --data-root=/var/lib/docker
+}
+
+stop() {
+    service_stop /usr/bin/dockerd
+}
+EOF
+
+# 设置权限
+chmod +x files/etc/init.d/dockerd
+
+# 添加 Docker 自启动
+ln -sf ../init.d/dockerd files/etc/rc.d/S99dockerd
+
 # passwall
 rm -rf feeds/luci/applications/luci-app-passwall/
 rm -rf feeds/packages/net/xray-core/
@@ -64,3 +103,5 @@ git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 #cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
 popd 
 
+# 确保 Docker 数据目录在升级时保留
+echo "/var/lib/docker" >> files/etc/sysupgrade.conf

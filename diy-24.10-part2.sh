@@ -1,40 +1,52 @@
 #!/bin/bash
-# 强制清理 PATH
-export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
-# 设置默认 IP
-sed -i 's/192.168.1.1/10.0.0.8/g; s/192.168.10.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 
-# IPv6 配置 (24.10 专用 UCI 方式)
-mkdir -p package/base-files/files/etc/uci-defaults
-cat << EOF > package/base-files/files/etc/uci-defaults/99-ipv6
+# 修改默认IP为10.0.0.8
+sed -i 's/192.168.1.1/10.0.0.8/g' package/base-files/files/bin/config_generate
+
+# 修复Docker启动脚本
+mkdir -p files/etc/init.d
+cat << 'EOF' > files/etc/init.d/dockerd
+#!/bin/sh /etc/rc.common
+
+START=99
+STOP=10
+
+start() {
+    # 等待存储设备就绪
+    while [ ! -b /dev/sda3 ]; do
+        sleep 1
+    done
+    # 挂载存储并启动Docker
+    mount /dev/sda3 /mnt/sda3 || mkdir -p /mnt/sda3
+    service_start /usr/bin/dockerd --data-root=/mnt/sda3/docker
+}
+
+stop() {
+    service_stop /usr/bin/dockerd
+}
+EOF
+chmod +x files/etc/init.d/dockerd
+
+# 保留Docker数据目录
+echo "/mnt/sda3/docker" >> files/etc/sysupgrade.conf
+
+# 配置qBittorrent下载路径
+mkdir -p files/mnt/sda3/downloads
+cat << 'EOF' > files/etc/config/qbittorrent
+config qbittorrent
+    option enabled '1'
+    option config_dir '/etc/qBittorrent'
+    option download_dir '/mnt/sda3/downloads'
+EOF
+
+# 修复文件系统检查
+cat << 'EOF' > files/etc/rc.local
 #!/bin/sh
-uci -q batch << EOI
-set network.lan.ip6assign='64'
-set network.lan.ip6hint='8888'
-set dhcp.lan.ra='hybrid'
-set dhcp.lan.dhcpv6='hybrid'
-commit network
-commit dhcp
-EOI
+fsck -y /dev/sda1
 exit 0
 EOF
+chmod +x files/etc/rc.local
 
-# 防火墙规则 (保留传统配置)
-sed -i '/config zone/,/option forward/s/REJECT/ACCEPT/' package/network/config/firewall/files/firewall.config
-cat << EOF >> package/network/config/firewall/files/firewall.config
-config rule
-    option name 'Allow-IPv6-Forward'
-    option src 'wan'
-    option dest 'lan'
-    option proto 'all'
-    option family 'ipv6'
-    option target 'ACCEPT'
-EOF
-
-# 内核优化
-echo "net.ipv6.conf.all.forwarding=1" >> package/base-files/files/etc/sysctl.conf
-echo "CONFIG_ALL_NONSHARED=y" >> .config
-echo "CONFIG_ALL_KMODS=y" >> .config
-
-# 生成配置
-make defconfig
+# 解决urandom.seed错误
+touch files/etc/urandom.seed
+chmod 644 files/etc/urandom.seed

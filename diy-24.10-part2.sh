@@ -135,7 +135,7 @@ config global
 
 config mount
     option target '/mnt/sda3'
-    option uuid ''
+    option uuid 'c6b55d55-eb8f-4d04-8b5f-abfbc2163c85'
     option fstype 'ext4'
     option options 'rw,noatime'
     option enabled '1'

@@ -7,7 +7,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: 24.10.config    # 修改此处文件名
+  CONFIG_FILE: 24.10.config
   DIY_P1_SH: diy-24.10-part1.sh
   DIY_P2_SH: diy-24.10-part2.sh
   TZ: Asia/Shanghai
@@ -20,7 +20,10 @@ jobs:
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 2048
-          swap-size-mb: 0
+          swap-size-mb: 1024  # 关键修复：Swap 大小必须 ≥1 MiB
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
 
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -47,7 +50,7 @@ jobs:
 
       - name: Apply Configurations
         run: |
-          cp $CONFIG_FILE openwrt/.config    # 正确加载新配置文件
+          cp $CONFIG_FILE openwrt/.config
           cd openwrt && ../$DIY_P2_SH
 
       - name: Compile Firmware

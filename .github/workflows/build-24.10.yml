@@ -9,7 +9,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: Build x86_64 OpenWrt_AI
+name: Build x86_64 OpenWrt_auto docker AI
 
 on:
   repository_dispatch:

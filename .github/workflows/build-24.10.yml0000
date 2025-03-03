@@ -1,80 +1,64 @@
-name: Build ImmortalWrt 24.10
+name: Build OpenWrt x86_64 (24.10)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 
 env:
-  REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: openwrt-24.10
-  CONFIG_FILE: immortal24.10.config
-  DIY_P1: diy-24.10-part1.sh
-  DIY_P2: diy-24.10-part2.sh
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: 24.10.config    # 修改此处文件名
+  DIY_P1_SH: diy-24.10-part1.sh
+  DIY_P2_SH: diy-24.10-part2.sh
+  TZ: Asia/Shanghai
 
 jobs:
   build:
     runs-on: ubuntu-22.04
-    timeout-minutes: 240
-
     steps:
-    - name: Checkout Configuration Files
-      uses: actions/checkout@v4
-      with:
-        path: config-repo
+      - name: Free Disk Space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 2048
+          swap-size-mb: 0
 
-    - name: Setup Advanced Toolchains
-      run: |
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh 16
-        sudo add-apt-repository ppa:deadsnakes/ppa -y
-        sudo apt-get update -y
-        sudo apt-get install -y \
-          clang-16 lld-16 \
-          python3.12 python3.12-dev \
-          libpython3.12-dev
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Install Base Dependencies
-      run: |
-        sudo apt-get install -y coreutils make
-        xargs -a config-repo/depends-24.10.txt sudo apt-get install -y
-        sudo ln -sf /usr/bin/clang-16 /usr/bin/clang
-        sudo ln -sf /usr/bin/clang++-16 /usr/bin/clang++
+      - name: Setup Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libncurses5-dev zlib1g-dev gawk git gettext libssl-dev
 
-    - name: Clone Source Code
-      run: |
-        git clone "$REPO_URL" -b "$REPO_BRANCH" openwrt
-        cp config-repo/"$CONFIG_FILE" openwrt/.config
-        cp config-repo/"$DIY_P1" openwrt/
-        cp config-repo/"$DIY_P2" openwrt/
+      - name: Clone Source
+        run: |
+          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
 
-    - name: Apply Custom Scripts
-      working-directory: openwrt
-      run: |
-        chmod +x "$DIY_P1" "$DIY_P2"
-        ./"$DIY_P1"
-        ./"$DIY_P2"
+      - name: Load Feeds
+        run: |
+          cp $FEEDS_CONF openwrt/feeds.conf.default
+          cd openwrt && ../$DIY_P1_SH
 
-    - name: Download Packages
-      working-directory: openwrt
-      run: |
-        make -j$(nproc) download || make -j1 V=s download
-        find dl -size -1024c -delete
+      - name: Update Feeds
+        run: |
+          cd openwrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
 
-    - name: Compile Firmware
-      working-directory: openwrt
-      env:
-        CC: clang
-        CXX: clang++
-        PATH: "/usr/lib/llvm-16/bin:/usr/bin:/bin:/usr/sbin:/sbin"  # 严格限制路径
-      run: |
-        echo "Cleaned PATH: $PATH"
-        make -j$(($(nproc) + 1)) || make -j1 V=s
-        
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: immortalwrt-24.10-bin
-        path: openwrt/bin/targets/
-        retention-days: 7
+      - name: Apply Configurations
+        run: |
+          cp $CONFIG_FILE openwrt/.config    # 正确加载新配置文件
+          cd openwrt && ../$DIY_P2_SH
+
+      - name: Compile Firmware
+        run: |
+          cd openwrt
+          make defconfig
+          make download -j$(nproc)
+          make -j$(nproc) || make -j1 V=s
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenWrt-Firmware-24.10
+          path: openwrt/bin/targets/x86/64/*

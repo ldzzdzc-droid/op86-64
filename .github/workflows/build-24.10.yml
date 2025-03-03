@@ -23,7 +23,7 @@ jobs:
           swap-size-mb: 0
 
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         run: |
@@ -58,7 +58,7 @@ jobs:
           make -j$(nproc) || make -j1 V=s
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: OpenWrt-Firmware-24.10
           path: openwrt/bin/targets/x86/64/*

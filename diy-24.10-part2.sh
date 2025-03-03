@@ -96,22 +96,13 @@ EOF
 echo "/etc/qBittorrent" >> files/etc/sysupgrade.conf
 echo "/mnt/sda3" >> files/etc/sysupgrade.conf
 
-# 添加 qBittorrent 数据迁移脚本，提供回退路径
+# 添加 qBittorrent 数据迁移脚本
 cat << 'EOF' > files/etc/uci-defaults/99-migrate-qbittorrent-data
 #!/bin/sh
 
-# 检查 /dev/sda3 是否存在
-if [ -e /dev/sda3 ]; then
-    mkdir -p /mnt/sda3/downloads
-    chmod 755 /mnt/sda3/downloads
-else
-    # 如果 /mnt/sda3 不可用，使用临时路径
-    mkdir -p /tmp/downloads
-    chmod 755 /tmp/downloads
-    # 更新 qBittorrent 配置
-    uci set qbittorrent.@qbittorrent[0].download_dir='/tmp/downloads'
-    uci commit qbittorrent
-fi
+# 创建下载目录
+mkdir -p /mnt/sda3/downloads
+chmod 755 /mnt/sda3/downloads
 
 # 如果存在旧数据，进行迁移
 if [ -d /opt/qBittorrent/qBittorrent ] && [ ! -d /etc/qBittorrent ]; then
@@ -130,7 +121,7 @@ EOF
 # 设置迁移脚本权限
 chmod +x files/etc/uci-defaults/99-migrate-qbittorrent-data
 
-# 配置外部存储挂载，使用 UUID，并默认禁用
+# 配置外部存储挂载，使用 UUID，并默认启用
 cat << 'EOF' > files/etc/config/fstab
 config global
     option anon_swap '0'
@@ -145,7 +136,7 @@ config mount
     option uuid 'c6b55d55-eb8f-4d04-8b5f-abfbc2163c85'
     option fstype 'ext4'
     option options 'rw,noatime'
-    option enabled '0'  # 默认禁用，避免设备不可用时导致启动失败
+    option enabled '1'  # 默认启用挂载
     option enabled_fsck '1'
 EOF
 
@@ -157,15 +148,6 @@ cat << 'EOF' > files/etc/uci-defaults/98-check-sda3
 if [ -e /dev/sda3 ]; then
     # 检查文件系统并尝试修复
     fsck.ext4 -y /dev/sda3
-    if [ $? -eq 0 ]; then
-        # 文件系统正常，启用挂载
-        uci set fstab.@mount[-1].enabled='1'
-        uci commit fstab
-    else
-        # 文件系统有严重错误，禁用挂载
-        uci set fstab.@mount[-1].enabled='0'
-        uci commit fstab
-    fi
 fi
 
 exit 0
@@ -173,6 +155,19 @@ EOF
 
 # 设置文件系统检查脚本权限
 chmod +x files/etc/uci-defaults/98-check-sda3
+
+# 配置 Samba
+cat << 'EOF' > files/etc/config/samba4
+config samba
+    option workgroup 'WORKGROUP'
+    option homes '1'
+
+config sambashare
+    option name 'sda3_share'
+    option path '/mnt/sda3'
+    option read_only 'no'
+    option guest_ok 'yes'
+EOF
 
 # 更新 SmartDNS 版本，确保与内核 6.6 兼容
 sed -i 's/1.2023.42/1.2024.46/g' feeds/packages/net/smartdns/Makefile

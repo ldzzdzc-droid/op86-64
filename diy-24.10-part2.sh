@@ -18,6 +18,8 @@ mkdir -p files/etc/uci-defaults
 mkdir -p files/var/lib/docker
 mkdir -p files/mnt/sda3/downloads
 mkdir -p files/etc/qBittorrent
+mkdir -p files/tmp/samba
+mkdir -p files/tmp/downloads
 
 # 修改默认 IP 为 10.0.0.8
 sed -i 's/192.168.1.1/10.0.0.8/g' package/base-files/files/bin/config_generate
@@ -37,6 +39,17 @@ popd
 
 # 增加连接跟踪限制
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
+
+# 清理 /etc/modules-boot.d/ 目录，避免加载未编译的模块
+cat << 'EOF' > files/etc/uci-defaults/96-clean-modules-boot
+#!/bin/sh
+
+# 清理 /etc/modules-boot.d/ 目录，避免加载未编译的模块
+rm -rf /etc/modules-boot.d/*
+exit 0
+EOF
+
+chmod +x files/etc/uci-defaults/96-clean-modules-boot
 
 # 修复 Docker 服务启动顺序
 cat << 'EOF' > files/etc/init.d/dockerd
@@ -96,13 +109,22 @@ EOF
 echo "/etc/qBittorrent" >> files/etc/sysupgrade.conf
 echo "/mnt/sda3" >> files/etc/sysupgrade.conf
 
-# 添加 qBittorrent 数据迁移脚本
+# 添加 qBittorrent 数据迁移脚本，提供回退路径
 cat << 'EOF' > files/etc/uci-defaults/99-migrate-qbittorrent-data
 #!/bin/sh
 
-# 创建下载目录
-mkdir -p /mnt/sda3/downloads
-chmod 755 /mnt/sda3/downloads
+# 检查 /dev/sda3 是否存在
+if [ -e /dev/sda3 ]; then
+    mkdir -p /mnt/sda3/downloads
+    chmod 755 /mnt/sda3/downloads
+else
+    # 如果 /mnt/sda3 不可用，使用临时路径
+    mkdir -p /tmp/downloads
+    chmod 755 /tmp/downloads
+    # 更新 qBittorrent 配置
+    uci set qbittorrent.@qbittorrent[0].download_dir='/tmp/downloads'
+    uci commit qbittorrent
+fi
 
 # 如果存在旧数据，进行迁移
 if [ -d /opt/qBittorrent/qBittorrent ] && [ ! -d /etc/qBittorrent ]; then
@@ -121,7 +143,7 @@ EOF
 # 设置迁移脚本权限
 chmod +x files/etc/uci-defaults/99-migrate-qbittorrent-data
 
-# 配置外部存储挂载，使用 UUID，并默认启用
+# 配置外部存储挂载，使用 UUID，并默认禁用
 cat << 'EOF' > files/etc/config/fstab
 config global
     option anon_swap '0'
@@ -136,11 +158,11 @@ config mount
     option uuid 'c6b55d55-eb8f-4d04-8b5f-abfbc2163c85'
     option fstype 'ext4'
     option options 'rw,noatime'
-    option enabled '1'  # 默认启用挂载
+    option enabled '0'  # 默认禁用，避免设备不可用时导致启动失败
     option enabled_fsck '1'
 EOF
 
-# 添加文件系统检查脚本
+# 添加文件系统检查脚本，并在挂载成功后重启相关服务
 cat << 'EOF' > files/etc/uci-defaults/98-check-sda3
 #!/bin/sh
 
@@ -148,6 +170,32 @@ cat << 'EOF' > files/etc/uci-defaults/98-check-sda3
 if [ -e /dev/sda3 ]; then
     # 检查文件系统并尝试修复
     fsck.ext4 -y /dev/sda3
+    if [ $? -eq 0 ]; then
+        # 文件系统正常，启用挂载
+        uci set fstab.@mount[-1].enabled='1'
+        uci commit fstab
+        # 挂载 /mnt/sda3
+        mkdir -p /mnt/sda3
+        mount /mnt/sda3
+        if [ $? -eq 0 ]; then
+            # 挂载成功，更新 qBittorrent 配置并重启服务
+            uci set qbittorrent.@qbittorrent[0].download_dir='/mnt/sda3/downloads'
+            uci commit qbittorrent
+            /etc/init.d/qbittorrent restart 2>/dev/null || true
+            # 更新 Samba 配置并重启服务
+            if [ -d /tmp/samba ]; then
+                mv /tmp/samba/* /mnt/sda3/ 2>/dev/null || true
+                rm -rf /tmp/samba
+            fi
+            uci set samba4.@sambashare[0].path='/mnt/sda3'
+            uci commit samba4
+            /etc/init.d/samba restart 2>/dev/null || true
+        fi
+    else
+        # 文件系统有严重错误，禁用挂载
+        uci set fstab.@mount[-1].enabled='0'
+        uci commit fstab
+    fi
 fi
 
 exit 0
@@ -156,7 +204,7 @@ EOF
 # 设置文件系统检查脚本权限
 chmod +x files/etc/uci-defaults/98-check-sda3
 
-# 配置 Samba
+# 配置 Samba，提供回退路径
 cat << 'EOF' > files/etc/config/samba4
 config samba
     option workgroup 'WORKGROUP'
@@ -168,6 +216,23 @@ config sambashare
     option read_only 'no'
     option guest_ok 'yes'
 EOF
+
+# 如果 /mnt/sda3 不可用，使用回退路径
+cat << 'EOF' > files/etc/uci-defaults/97-configure-samba-fallback
+#!/bin/sh
+
+# 检查 /mnt/sda3 是否已挂载
+if ! mountpoint -q /mnt/sda3; then
+    # 使用回退路径
+    uci set samba4.@sambashare[0].path='/tmp/samba'
+    uci commit samba4
+fi
+
+exit 0
+EOF
+
+# 设置 Samba 回退脚本权限
+chmod +x files/etc/uci-defaults/97-configure-samba-fallback
 
 # 更新 SmartDNS 版本，确保与内核 6.6 兼容
 sed -i 's/1.2023.42/1.2024.46/g' feeds/packages/net/smartdns/Makefile

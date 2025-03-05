@@ -1,4 +1,4 @@
-name: Build GROKx86_64 OpenWrt
+name: Build Grok OpenWrt
 
 on:
   repository_dispatch:

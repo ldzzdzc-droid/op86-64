@@ -6,7 +6,7 @@
 # See /LICENSE for more information.
 #
 # https://github.com/P3TERX/Actions-OpenWrt
-# File name: diy-part2.sh
+# File name: diy-24.10-part2.sh
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 
@@ -66,6 +66,8 @@ fi
 " > files/usr/lib/upgrade/keep.d/99_restartServices
 chmod +x files/usr/lib/upgrade/keep.d/99_restartServices
 
+# 创建 files/etc 目录并写入 rc.local
+mkdir -p files/etc
 echo "#!/bin/sh
 if [ ! -L /opt/qBittorrent ]; then
   mkdir -p /var/qBittorrent

@@ -1,14 +1,4 @@
-#
-# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-# https://github.com/P3TERX/Actions-OpenWrt
-# Description: Build OpenWrt using GitHub Actions
-#
-
-name: AI x86_64 OpenWrt
+name: Build x86_64 OpenWrt
 
 on:
   repository_dispatch:
@@ -119,10 +109,15 @@ jobs:
 
     - name: Load custom configuration
       run: |
+        echo "Current directory before operations: $(pwd)"
+        ls -l
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_P2_SH
         cd openwrt
+        echo "Current directory after cd openwrt: $(pwd)"
+        ls -l
+        echo "Executing $DIY_P2_SH"
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
     - name: Download package

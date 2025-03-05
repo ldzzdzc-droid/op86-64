@@ -10,6 +10,9 @@
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 
+# 调试当前目录
+echo "Current directory: $(pwd)"
+
 # 1. Modify default IP
 sed -i 's/192.168.1.1/10.0.0.10/g' package/base-files/files/bin/config_generate
 
@@ -54,6 +57,7 @@ git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 popd
 
 # 10. Create custom files for data preservation and service management
+echo "Creating files/usr/lib/upgrade/keep.d/"
 mkdir -p files/usr/lib/upgrade/keep.d
 echo "#!/bin/sh
 # Restart docker and qBittorrent services after upgrade
@@ -67,7 +71,15 @@ fi
 chmod +x files/usr/lib/upgrade/keep.d/99_restartServices
 
 # 创建 files/etc 目录并写入 rc.local
+echo "Creating files/etc/"
 mkdir -p files/etc
+if [ -d files/etc ]; then
+  echo "files/etc directory created successfully"
+else
+  echo "Failed to create files/etc directory"
+  exit 1
+fi
+echo "Writing to files/etc/rc.local"
 echo "#!/bin/sh
 if [ ! -L /opt/qBittorrent ]; then
   mkdir -p /var/qBittorrent
@@ -81,4 +93,10 @@ if uci get service.@qbittorrent[0].name > /dev/null 2>&1; then
 fi
 uci commit service
 " > files/etc/rc.local
-chmod +x files/etc/rc.local
+if [ -f files/etc/rc.local ]; then
+  echo "files/etc/rc.local created successfully"
+  chmod +x files/etc/rc.local
+else
+  echo "Failed to create files/etc/rc.local"
+  exit 1
+fi

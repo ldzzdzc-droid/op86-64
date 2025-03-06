@@ -19,8 +19,8 @@ git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/luci-a
 
 # Fix ipt2socks version to v1.1.4
 if [ -d "package/openwrt-passwall/ipt2socks" ]; then
-  sed -i 's/PKG_VERSION:=1.1.5/PKG_VERSION:=1.1.4/g' package/openwrt-passwall/ipt2socks/Makefile
-  sed -i 's|PKG_SOURCE_URL:=.*|PKG_SOURCE_URL:=https://github.com/zfl9/ipt2socks/archive/refs/tags/v$(PKG_VERSION).tar.gz?|g' package/openwrt-passwall/ipt2socks/Makefile
+  sed -i 's/PKG_VERSION:=.*/PKG_VERSION:=1.1.4/g' package/openwrt-passwall/ipt2socks/Makefile
+  sed -i 's|PKG_SOURCE_URL:=.*|PKG_SOURCE_URL:=https://github.com/zfl9/ipt2socks/archive/refs/tags/v$(PKG_VERSION).tar.gz|g' package/openwrt-passwall/ipt2socks/Makefile
   sed -i 's/PKG_HASH:=.*/PKG_HASH:=73a2498dc95934c225d358707e7f7d060b5ce81aa45260ada09cbd15207d27d1/g' package/openwrt-passwall/ipt2socks/Makefile
 fi
 
@@ -55,13 +55,6 @@ git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
 pushd package/lean
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 popd
-
-# Fix smartdns_luci Makefile for lede branch
-if [ -d "feeds/luci/applications/luci-app-smartdns" ]; then
-  sed -i 's|LUCI_DEPENDS:=.*|LUCI_DEPENDS:=+smartdns|' feeds/luci/applications/luci-app-smartdns/Makefile
-  sed -i '/define Package\/luci-app-smartdns\/install/,/endef/d' feeds/luci/applications/luci-app-smartdns/Makefile
-  echo -e "\ndefine Package/luci-app-smartdns/install\n\t$(INSTALL_DIR) $(1)/usr/lib/lua/luci\n\tcp -pR $(PKG_BUILD_DIR)/luasrc/* $(1)/usr/lib/lua/luci/\nendef" >> feeds/luci/applications/luci-app-smartdns/Makefile
-fi
 
 # Create custom files for data preservation and service management
 mkdir -p files/usr/lib/upgrade/keep.d

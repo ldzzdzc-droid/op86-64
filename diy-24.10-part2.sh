@@ -6,44 +6,52 @@
 # See /LICENSE for more information.
 #
 # https://github.com/P3TERX/Actions-OpenWrt
-# File name: diy-part2.sh
+# File name: diy-24.10-part2.sh
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 
-# 移除要替换的包
+# Remove and replace certain packages
 rm -rf feeds/luci/applications/luci-app-passwall/
 rm -rf feeds/packages/net/xray-core/
 rm -rf feeds/packages/net/xray-plugin/
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 
-# 添加温度显示
+# Fix ipt2socks version to v1.1.4
+if [ -d "package/openwrt-passwall/ipt2socks" ]; then
+  sed -i 's/PKG_VERSION:=1.1.5/PKG_VERSION:=1.1.4/g' package/openwrt-passwall/ipt2socks/Makefile
+  sed -i 's|PKG_SOURCE_URL:=.*|PKG_SOURCE_URL:=https://github.com/zfl9/ipt2socks/archive/refs/tags/v$(PKG_VERSION).tar.gz?|g' package/openwrt-passwall/ipt2socks/Makefile
+  sed -i 's/PKG_HASH:=.*/PKG_HASH:=73a2498dc95934c225d358707e7f7d060b5ce81aa45260ada09cbd15207d27d1/g' package/openwrt-passwall/ipt2socks/Makefile
+fi
+
+# Add temperature display
 sed -i 's/or "1"%>/or "1"%> ( <%=luci.sys.exec("expr `cat \/sys\/class\/thermal\/thermal_zone0\/temp` \/ 1000") or "?"%> \℃ ) /g' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 
-# Modify default IP
-sed -i 's/192.168.1.1/10.0.0.10/g' package/base-files/files/bin/config_generate
+# Modify default IP to 10.0.0.8
+sed -i 's/192.168.1.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 
-# 修改输出文件名
+# Modify output file name
 sed -i 's/IMG_PREFIX:=$(VERSION_DIST_SANITIZED)/IMG_PREFIX:=full-$(shell date +%Y%m%d)-$(VERSION_DIST_SANITIZED)/g' include/image.mk
 
-# 修改系统版本号
+# Update system version number
 pushd package/lean/default-settings/files
 sed -i '/http/d' zzz-default-settings
 export orig_version="$(cat "zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')"
 sed -i "s/${orig_version}/${orig_version} ($(date +"%Y-%m-%d"))/g" zzz-default-settings
 popd
 
-# 修正连接数
+# Correct connection number
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
 
-# 更新lean的内置的smartdns版本
+# Update SmartDNS version
 sed -i 's/1.2023.42/1.2024.46/g' feeds/packages/net/smartdns/Makefile
 sed -i 's/ed102cda03c56e9c63040d33d4a391b56491493e/07c13827bb523519a638214ed7ad76180f71a40a/g' feeds/packages/net/smartdns/Makefile
 sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 
-# 添加大吉
+# Add Lucky app
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
 
+# Add luci-app-dockerman
 pushd package/lean
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 popd
@@ -51,27 +59,35 @@ popd
 # Create custom files for data preservation and service management
 mkdir -p files/usr/lib/upgrade/keep.d
 echo "#!/bin/sh
-# Restart docker and qBittorrent services after upgrade
+# Restart docker, qBittorrent, and other services after upgrade
 if [ -x /etc/init.d/dockerd ] && [ -f /etc/config/dockerd ]; then
   service dockerd restart
 fi
 if [ -x /etc/init.d/qbittorrent ] && [ -f /etc/config/qbittorrent ]; then
   service qbittorrent restart
 fi
+if [ -x /etc/init.d/vlmcsd ] && [ -f /etc/config/vlmcsd ]; then
+  service vlmcsd restart
+fi
 " > files/usr/lib/upgrade/keep.d/99_restartServices
 chmod +x files/usr/lib/upgrade/keep.d/99_restartServices
 
 mkdir -p files/etc
 echo "#!/bin/sh
+# Ensure qBittorrent data is preserved and services are enabled
 if [ ! -L /opt/qBittorrent ]; then
   mkdir -p /var/qBittorrent
   ln -s /var/qBittorrent /opt/qBittorrent
 fi
+# Enable and start services
 if uci get service.@dockerd[0].name > /dev/null 2>&1; then
   uci set service.@dockerd[0].enabled=1
 fi
 if uci get service.@qbittorrent[0].name > /dev/null 2>&1; then
   uci set service.@qbittorrent[0].enabled=1
+fi
+if uci get service.@vlmcsd[0].name > /dev/null 2>&1; then
+  uci set service.@vlmcsd[0].enabled=1
 fi
 uci commit service
 " > files/etc/rc.local

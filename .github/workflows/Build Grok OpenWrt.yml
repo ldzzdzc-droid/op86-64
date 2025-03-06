@@ -145,9 +145,20 @@ jobs:
             echo "status=failure" >> $GITHUB_OUTPUT
             exit 1
           }
+          # 只保留 generic-squashfs-combined-efi.img.gz 文件，删除其他格式
+          echo "Filtering for generic-squashfs-combined-efi.img.gz..."
+          find . -type f ! -name "*generic-squashfs-combined-efi.img.gz" -exec rm -f {} \;
           rm -rf packages
-          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-          echo "status=success" >> $GITHUB_OUTPUT
+          if [ -f "*generic-squashfs-combined-efi.img.gz" ]; then
+            echo "Found generic-squashfs-combined-efi.img.gz"
+            echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "Error: generic-squashfs-combined-efi.img.gz not found"
+            ls -l
+            echo "status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
         else
           echo "Error: bin/targets directory not found"
           ls -l
@@ -160,4 +171,4 @@ jobs:
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}
+        path: ${{ env.FIRMWARE }}/*generic-squashfs-combined-efi.img.gz  # 只上传指定的固件文件

@@ -10,54 +10,40 @@
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #
 
-# 添加温度显示
-sed -i 's/or "1"%>/or "1"%> ( <%=luci.sys.exec("expr `cat \/sys\/class\/thermal\/thermal_zone0\/temp` \/ 1000") or "?"%> \&#8451; ) /g' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 # Modify default IP
 sed -i 's/192.168.1.1/10.0.0.10/g' package/base-files/files/bin/config_generate
-# 修改输出文件名
+# Modify output filename
 sed -i 's/IMG_PREFIX:=$(VERSION_DIST_SANITIZED)/IMG_PREFIX:=full-$(shell date +%Y%m%d)-$(VERSION_DIST_SANITIZED)/g' include/image.mk
-# 修改系统版本号
+# Modify system version
 pushd package/lean/default-settings/files
 sed -i '/http/d' zzz-default-settings
 export orig_version="$(cat "zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')"
 sed -i "s/${orig_version}/${orig_version} ($(date +"%Y-%m-%d"))/g" zzz-default-settings
 popd
 
-# 修改默认主题
-#sed -i 's/luci-theme-bootstrap/luci-theme-Argon/g' feeds/luci/collections/luci/Makefile
-#修正连接数
-sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
-
-# passwall
+# Passwall
 rm -rf feeds/luci/applications/luci-app-passwall/
 rm -rf feeds/packages/net/xray-core/
 rm -rf feeds/packages/net/xray-plugin/
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 
-########### 更改大雕源码（可选）20220712增加###########
+# Fix ipt2socks download URL
+sed -i 's|https://codeload.github.com/zfl9/ipt2socks/tar.gz/v1.1.5?|https://github.com/zfl9/ipt2socks/archive/refs/tags/v1.1.5.tar.gz|' package/openwrt-passwall/ipt2socks/Makefile
+
+# Change kernel version to 6.6
 sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.6/g' target/linux/x86/Makefile
 
-########### 更新lean的内置的smartdns版本20230909注释掉了 ###########
+# Update smartdns version
 sed -i 's/1.2023.42/1.2024.46/g' feeds/packages/net/smartdns/Makefile
 sed -i 's/ed102cda03c56e9c63040d33d4a391b56491493e/07c13827bb523519a638214ed7ad76180f71a40a/g' feeds/packages/net/smartdns/Makefile
 sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 
-
-#添加额外非必须软件包####20230909加入第一行原来是释掉的 
-#git clone https://github.com/pymumu/smartdns.git package/smartdns
-#git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
-#git clone --branch lede https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
-
-#添加大吉
+# Add extra packages
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
-
-#新加入插件第二部分
 pushd package/lean
-# SmartDNS
-
-#git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
-#git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
-#cp -f $GITHUB_WORKSPACE/general/qBittorrent/Makefile feeds/packages/net/qBittorrent/Makefile
-popd 
+popd
+
+# Correct connection count
+sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf

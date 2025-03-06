@@ -56,6 +56,13 @@ pushd package/lean
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 popd
 
+# Fix smartdns_luci Makefile for lede branch
+if [ -d "feeds/luci/applications/luci-app-smartdns" ]; then
+  sed -i 's|LUCI_DEPENDS:=.*|LUCI_DEPENDS:=+smartdns|' feeds/luci/applications/luci-app-smartdns/Makefile
+  sed -i '/define Package\/luci-app-smartdns\/install/,/endef/d' feeds/luci/applications/luci-app-smartdns/Makefile
+  echo -e "\ndefine Package/luci-app-smartdns/install\n\t$(INSTALL_DIR) $(1)/usr/lib/lua/luci\n\tcp -pR $(PKG_BUILD_DIR)/luasrc/* $(1)/usr/lib/lua/luci/\nendef" >> feeds/luci/applications/luci-app-smartdns/Makefile
+fi
+
 # Create custom files for data preservation and service management
 mkdir -p files/usr/lib/upgrade/keep.d
 echo "#!/bin/sh

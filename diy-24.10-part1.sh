@@ -16,6 +16,14 @@ echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-pa
 echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main' >>feeds.conf.default
 echo 'src-git smartdns_luci https://github.com/pymumu/luci-app-smartdns;lede' >>feeds.conf.default
 
+# --- 修改处开始 ---
+# 修改 sysupgrade.conffiles，添加需要保留的文件
+echo "/etc/config/dockerd" >> package/system/procd/files/sysupgrade.conffiles
+echo "/opt/qBittorrent/qBittorrent/cache/" >> package/system/procd/files/sysupgrade.conffiles
+echo "/opt/qBittorrent/qBittorrent/config/" >> package/system/procd/files/sysupgrade.conffiles
+echo "/opt/qBittorrent/qBittorrent/data/" >> package/system/procd/files/sysupgrade.conffiles
+# --- 修改处结束 ---
+
 # Update and install feeds with error handling
 ./scripts/feeds update -a || echo "Feed update failed, but continuing..."
 ./scripts/feeds install -a

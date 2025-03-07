@@ -56,6 +56,55 @@ pushd package/lean
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 popd
 
+# --- New Additions Start Here ---
+# Modify sysupgrade script to backup and restore qBittorrent files
+cat << 'EOF' >> package/system/fstools/files/sysupgrade
+# Backup qBittorrent files before sysupgrade
+backup_qbittorrent() {
+    local backup_dir="/tmp/qbittorrent_backup"
+    mkdir -p "$backup_dir"
+    if [ -d "/opt/qBittorrent/qBittorrent" ]; then
+        cp -r /opt/qBittorrent/qBittorrent/cache "$backup_dir/"
+        cp -r /opt/qBittorrent/qBittorrent/config "$backup_dir/"
+        cp -r /opt/qBittorrent/qBittorrent/data "$backup_dir/"
+        echo "qBittorrent files backed up to $backup_dir"
+    fi
+}
+
+# Restore qBittorrent files after sysupgrade
+restore_qbittorrent() {
+    local backup_dir="/tmp/qbittorrent_backup"
+    if [ -d "$backup_dir" ]; then
+        mkdir -p /opt/qBittorrent/qBittorrent
+        cp -r "$backup_dir/cache" /opt/qBittorrent/qBittorrent/
+        cp -r "$backup_dir/config" /opt/qBittorrent/qBittorrent/
+        cp -r "$backup_dir/data" /opt/qBittorrent/qBittorrent/
+        rm -rf "$backup_dir"
+        echo "qBittorrent files restored from $backup_dir"
+    fi
+}
+
+# Call backup before sysupgrade, restore after sysupgrade
+case "$1" in
+    "save")
+        backup_qbittorrent
+        ;;
+    "restore")
+        restore_qbittorrent
+        ;;
+esac
+EOF
+
+# Modify init script to ensure Docker starts on boot
+cat << 'EOF' >> package/system/procd/initd/boot
+# Enable and start Docker service during boot
+if [ -f /etc/init.d/dockerd ]; then
+    /etc/init.d/dockerd enable
+    /etc/init.d/dockerd start
+fi
+EOF
+# --- New Additions End Here ---
+
 # Create custom files for data preservation and service management
 mkdir -p files/usr/lib/upgrade/keep.d
 echo "#!/bin/sh
@@ -72,12 +121,12 @@ fi
 " > files/usr/lib/upgrade/keep.d/99_restartServices
 chmod +x files/usr/lib/upgrade/keep.d/99_restartServices
 
-# 配置挂载和符号链接
+# Configure mount and symbolic links
 mkdir -p files/etc/config
 echo "config mount
         option target '/mnt/sda3'
         option uuid 'c6b55d55-eb8f-4d04-8b5f-abfbc2163c85'
-        option fstype 'ext4'  # 根据实际分区格式调整
+        option fstype 'ext4'  # Adjust based on actual partition format
         option enabled '1'
         option options 'rw,sync'" > files/etc/config/fstab
 
@@ -110,6 +159,6 @@ uci commit service
 " > files/etc/rc.local
 chmod +x files/etc/rc.local
 
-# 添加调试信息以确认编译后文件生成情况
+# Add debug info to verify compilation output
 echo "Listing contents of bin/targets/x86/64 after compilation:"
 ls -l bin/targets/x86/64 || echo "Directory bin/targets/x86/64 not found"

@@ -184,9 +184,8 @@ jobs:
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/x86/64
-        echo "Listing contents of current directory:"  # 添加调试信息 - 修改处
+        echo "Listing contents of current directory:"
         ls -l
-        # Find the EFI image file with flexible matching - 修改处
         EFI_IMAGE=$(find . -name "*generic*squashfs*combined*efi.img.gz" -type f)
         if [ -n "$EFI_IMAGE" ]; then
           echo "Found EFI image: $EFI_IMAGE"

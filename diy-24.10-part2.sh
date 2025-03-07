@@ -72,12 +72,29 @@ fi
 " > files/usr/lib/upgrade/keep.d/99_restartServices
 chmod +x files/usr/lib/upgrade/keep.d/99_restartServices
 
+# 配置挂载和符号链接
+mkdir -p files/etc/config
+echo "config mount
+        option target '/mnt/sda3'
+        option device '/dev/sda3'
+        option fstype 'ext4'  # 根据实际分区格式调整
+        option enabled '1'
+        option options 'rw,sync'" > files/etc/config/fstab
+
 mkdir -p files/etc
 echo "#!/bin/sh
-# Ensure qBittorrent data is preserved and services are enabled
-if [ ! -L /opt/qBittorrent ]; then
+# Ensure /mnt/sda3 exists and create symbolic link for qBittorrent
+if [ -d /mnt/sda3 ]; then
+  mkdir -p /mnt/sda3/qBittorrent
+  if [ ! -L /opt/qBittorrent ]; then
+    ln -sf /mnt/sda3/qBittorrent /opt/qBittorrent
+  fi
+else
+  # Fallback to /var/qBittorrent if /mnt/sda3 is not available
   mkdir -p /var/qBittorrent
-  ln -s /var/qBittorrent /opt/qBittorrent
+  if [ ! -L /opt/qBittorrent ]; then
+    ln -sf /var/qBittorrent /opt/qBittorrent
+  fi
 fi
 # Enable and start services
 if uci get service.@dockerd[0].name > /dev/null 2>&1; then
@@ -90,17 +107,9 @@ if uci get service.@vlmcsd[0].name > /dev/null 2>&1; then
   uci set service.@vlmcsd[0].enabled=1
 fi
 uci commit service
-# 确保 qBittorrent 数据持久化 - 修改处
-mkdir -p /etc/config/fstab
-echo "config mount
-        option target '/opt/qBittorrent'
-        option device '/var/qBittorrent'
-        option fstype 'bind'
-        option enabled '1'
-        option options 'bind'" > /etc/config/fstab
 " > files/etc/rc.local
 chmod +x files/etc/rc.local
 
-# 添加调试信息以确认编译后文件生成情况 - 修改处
+# 添加调试信息以确认编译后文件生成情况
 echo "Listing contents of bin/targets/x86/64 after compilation:"
 ls -l bin/targets/x86/64 || echo "Directory bin/targets/x86/64 not found"

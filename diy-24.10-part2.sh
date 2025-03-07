@@ -92,3 +92,7 @@ fi
 uci commit service
 " > files/etc/rc.local
 chmod +x files/etc/rc.local
+
+# 添加调试信息以确认编译后文件生成情况 - 修改处
+echo "Listing contents of bin/targets/x86/64 after compilation:"
+ls -l bin/targets/x86/64 || echo "Directory bin/targets/x86/64 not found"

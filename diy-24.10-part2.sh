@@ -76,7 +76,7 @@ chmod +x files/usr/lib/upgrade/keep.d/99_restartServices
 mkdir -p files/etc/config
 echo "config mount
         option target '/mnt/sda3'
-        option device '/dev/sda3'
+        option uuid 'c6b55d55-eb8f-4d04-8b5f-abfbc2163c85'
         option fstype 'ext4'  # 根据实际分区格式调整
         option enabled '1'
         option options 'rw,sync'" > files/etc/config/fstab

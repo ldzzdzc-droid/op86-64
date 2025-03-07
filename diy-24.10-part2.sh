@@ -90,6 +90,14 @@ if uci get service.@vlmcsd[0].name > /dev/null 2>&1; then
   uci set service.@vlmcsd[0].enabled=1
 fi
 uci commit service
+# 确保 qBittorrent 数据持久化 - 修改处
+mkdir -p /etc/config/fstab
+echo "config mount
+        option target '/opt/qBittorrent'
+        option device '/var/qBittorrent'
+        option fstype 'bind'
+        option enabled '1'
+        option options 'bind'" > /etc/config/fstab
 " > files/etc/rc.local
 chmod +x files/etc/rc.local
 

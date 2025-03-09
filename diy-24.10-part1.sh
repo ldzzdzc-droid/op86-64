@@ -17,13 +17,13 @@ echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main' >
 echo 'src-git smartdns_luci https://github.com/pymumu/luci-app-smartdns;lede' >>feeds.conf.default
 
 # --- 修改处开始 ---
-# 修改 sysupgrade.conffiles，添加需要保留的文件
-echo "/etc/config/dockerd" >> package/system/procd/files/sysupgrade.conffiles
-echo "/opt/qBittorrent/qBittorrent/cache/" >> package/system/procd/files/sysupgrade.conffiles
-echo "/opt/qBittorrent/qBittorrent/config/" >> package/system/procd/files/sysupgrade.conffiles
-echo "/opt/qBittorrent/qBittorrent/data/" >> package/system/procd/files/sysupgrade.conffiles
+# Preserve /etc/config/qBittorrent during upgrade, remove unnecessary external storage paths
+echo "/etc/config/qBittorrent" >> package/system/procd/files/sysupgrade.conffiles
+# 移除之前可能存在的 /opt/qBittorrent/qBittorrent/caches/ 等路径，确保不重复添加
+sed -i '/\/opt\/qBittorrent\/qBittorrent\/caches\//d' package/system/procd/files/sysupgrade.conffiles
+sed -i '/\/opt\/qBittorrent\/qBittorrent\/config\//d' package/system/procd/files/sysupgrade.conffiles
+sed -i '/\/opt\/qBittorrent\/qBittorrent\/data\//d' package/system/procd/files/sysupgrade.conffiles
 # --- 修改处结束 ---
-
 # Update and install feeds with error handling
 ./scripts/feeds update -a || echo "Feed update failed, but continuing..."
 ./scripts/feeds install -a

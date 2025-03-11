@@ -38,8 +38,8 @@ jobs:
         df -hT
         echo "=============================================================================="
 
-    - name: "Optimize Disk Space"
-      uses: "hugoalh/disk-space-optimizer-ghaction@v0.8.1"
+    - name: Optimize Disk Space
+      uses: hugoalh/disk-space-optimizer-ghaction@v0.8.1
       with:
         operate_sudo: "True"
         general_include: ".+"
@@ -117,9 +117,7 @@ jobs:
     - name: Restore cache
       uses: actions/cache/restore@v3
       with:
-        path: |
-          openwrt/dl
-          openwrt/build_dir
+        path: openwrt/dl
         key: ${{ env.CACHE_KEY }}
         restore-keys: |
           ${{ env.CACHE_KEY }}
@@ -179,13 +177,19 @@ jobs:
           exit 1
         fi
 
+    - name: Clean up build_dir to free space
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        cd openwrt
+        rm -rf build_dir
+        echo "Cleaned up build_dir to free disk space"
+        df -hT
+
     - name: Save cache
       uses: actions/cache/save@v3
       if: steps.compile.outputs.status == 'success'
       with:
-        path: |
-          openwrt/dl
-          openwrt/build_dir
+        path: openwrt/dl
         key: ${{ env.CACHE_KEY }}
 
     - name: Debug directory structure

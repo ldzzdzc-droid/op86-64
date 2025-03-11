@@ -56,131 +56,39 @@ pushd package/lean
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 popd
 
-# --- 修改处开始 ---
-# Modify sysupgrade script to ensure Docker and qBittTorrent services restart after upgrade
-cat << 'EOF' >> package/system/fstools/files/sysupgrade
-# Ensure Docker and qBittTorrent services restart after upgrade
-restart_services() {
-    if [ -x /etc/init.d/dockerd ] && [ -f /etc/config/dockerd ]; then
-        /etc/init.d/dockerd restart
-        echo "Docker service restarted after upgrade"
-    fi
-    if [ -x /etc/init.d/qbittorrent ] && [ -f /etc/config/qbittorrent ]; then
-        /etc/init.d/qbittorrent restart
-        echo "qBittTorrent service restarted after upgrade"
-    fi
-}
-
-case "$1" in
-    "restore")
-        restart_services
-        ;;
-esac
-EOF
-# --- 修改处结束 ---
-
-# Create custom files for data preservation and service management
+# Create custom files for basic service management, remove qBittorrent data persistence and Docker auto-start logic
 mkdir -p files/usr/lib/upgrade/keep.d
 echo "#!/bin/sh
-# Restart docker, qBittTorrent, and other services after upgrade
-if [ -x /etc/init.d/dockerd ] && [ -f /etc/config/dockerd ]; then
-  service dockerd restart
-fi
-if [ -x /etc/init.d/qbittorrent ] && [ -f /etc/config/qbittorrent ]; then
-  service qbittorrent restart
-fi
+# Basic service restart after upgrade, excluding custom qBittorrent and Docker logic
 if [ -x /etc/init.d/vlmcsd ] && [ -f /etc/config/vlmcsd ]; then
   service vlmcsd restart
 fi
 " > files/usr/lib/upgrade/keep.d/99_restartServices
 chmod +x files/usr/lib/upgrade/keep.d/99_restartServices
 
-# Configure mount and symbolic links
+# Keep basic mount configuration, add mount for /mnt/sdb2 - 修改处
 mkdir -p files/etc/config
-echo "config mount
-        option target '/mnt/sda3'
-        option uuid 'c6b55d55-eb8f-4d04-8b5f-abfbc2163c85'
-        option fstype 'ext4'
-        option enabled '1'
-        option options 'rw,sync'" > files/etc/config/fstab
+cat << 'EOF' > files/etc/config/fstab
+config mount
+    option target '/mnt/sda3'
+    option uuid 'c6b55d55-eb8f-4d04-8b5f-abfbc2163c85'
+    option fstype 'ext4'
+    option enabled '1'
+    option options 'rw,sync'
+
+config mount
+    option target '/mnt/sdb2'
+    option uuid '40969A5D969A5370'
+    option fstype 'ext4'
+    option enabled '1'
+    option options 'rw,sync'
+EOF
 
 mkdir -p files/etc
 echo "#!/bin/sh
-# Ensure /mnt/sda3 exists and create symbolic link for qBittTorrent
-if [ -d /mnt/sda3 ]; then
-  mkdir -p /mnt/sda3/qBittTorrent
-  if [ ! -L /opt/qBittTorrent ]; then
-    ln -sf /mnt/sda3/qBittTorrent /opt/qBittTorrent
-    echo \"Symbolic link created: /opt/qBittTorrent -> /mnt/sda3/qBittTorrent\"
-  else
-    echo \"Symbolic link already exists: /opt/qBittTorrent\"
-  fi
-else
-  # Fallback to /var/qBittTorrent if /mnt/sda3 is not available
-  mkdir -p /var/qBittTorrent
-  if [ ! -L /opt/qBittTorrent ]; then
-    ln -sf /var/qBittTorrent /opt/qBittTorrent
-    echo \"Symbolic link created: /opt/qBittTorrent -> /var/qBittTorrent\"
-  else
-    echo \"Symbolic link already exists: /opt/qBittTorrent\"
-  fi
-fi
-
-# Enable and start services with debug
-echo \"Checking if docker service is enabled...\"
-if uci get service.@dockerd[0].enabled; then
-  echo \"docker service is enabled\"
-else
-  echo \"docker service is not enabled, enabling now...\"
-  uci set service.@dockerd[0].enabled=1
-  uci commit service
-fi
-
-echo \"Starting docker service...\"
-if [ -x /etc/init.d/dockerd ]; then
-  /etc/init.d/dockerd start
-  echo \"docker service started\"
-else
-  echo \"docker service init script not found\"
-fi
-
-if uci get service.@qbittorrent[0].name > /dev/null 2>&1; then
-  echo \"Checking if qbittorrent service is enabled...\"
-  if uci get service.@qbittorrent[0].enabled; then
-    echo \"qbittorrent service is enabled\"
-  else
-    echo \"qbittorrent service is not enabled, enabling now...\"
-    uci set service.@qbittorrent[0].enabled=1
-    uci commit service
-  fi
-
-  echo \"Starting qbittorrent service...\"
-  if [ -x /etc/init.d/qbittorrent ]; then
-    /etc/init.d/qbittorrent start
-    echo \"qbittorrent service started\"
-  else
-    echo \"qbittorrent service init script not found\"
-  fi
-fi
-
-if uci get service.@vlmcsd[0].name > /dev/null 2>&1; then
-  echo \"Checking if vlmcsd service is enabled...\"
-  if uci get service.@vlmcsd[0].enabled; then
-    echo \"vlmcsd service is enabled\"
-  else
-    echo \"vlmcsd service is not enabled, enabling now...\"
-    uci set service.@vlmcsd[0].enabled=1
-    uci commit service
-  fi
-
-  echo \"Starting vlmcsd service...\"
-  if [ -x /etc/init.d/vlmcsd ]; then
-    /etc/init.d/vlmcsd start
-    echo \"vlmcsd service started\"
-  else
-    echo \"vlmcsd service init script not found\"
-  fi
-fi
+# Basic rc.local, remove qBittorrent symbolic link and service start logic
+# Keep only essential network and system settings
+echo \"Basic system initialization complete\"
 " > files/etc/rc.local
 chmod +x files/etc/rc.local
 

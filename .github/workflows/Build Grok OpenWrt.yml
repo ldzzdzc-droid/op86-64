@@ -115,7 +115,7 @@ jobs:
         echo "CACHE_KEY=${{ runner.os }}-openwrt-build-cache-${{ steps.openwrt_hash.outputs.hash }}-${{ hashFiles('24.10.config', 'feeds.conf.default', 'diy-24.10-part1.sh', 'diy-24.10-part2.sh') }}" >> $GITHUB_ENV
 
     - name: Restore cache
-      uses: actions/restore-cache@v3
+      uses: actions/cache/restore@v3
       with:
         path: |
           openwrt/dl
@@ -180,7 +180,7 @@ jobs:
         fi
 
     - name: Save cache
-      uses: actions/save-cache@v3
+      uses: actions/cache/save@v3
       if: steps.compile.outputs.status == 'success'
       with:
         path: |

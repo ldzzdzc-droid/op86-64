@@ -25,7 +25,7 @@ if [ -d "package/openwrt-passwall/ipt2socks" ]; then
 fi
 
 # Add temperature display
-sed -i 's/or "1"%>/or "1"%> ( <%=luci.sys.exec("expr `cat \/sys\/class\/thermal\/thermal_zone0\/temp` \/ 1000") or "?"%> \℃ ) /g' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
+sed -i 's/or "1"%>/or "1"%> ( <%=luci.sys.exec("expr `cat /sys/class/thermal/thermal_zone0/temp` / 1000") or "?"%> \℃ ) /g' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 
 # Modify default IP to 10.0.0.8
 sed -i 's/192.168.1.1/10.0.0.8/g' package/base-files/files/bin/config_generate
@@ -56,17 +56,17 @@ pushd package/lean
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 popd
 
-# Create custom files for basic service management, remove qBittorrent data persistence and Docker auto-start logic
+# Create custom files for basic service management, remove qBittTorrent data persistence and Docker auto-start logic
 mkdir -p files/usr/lib/upgrade/keep.d
 echo "#!/bin/sh
-# Basic service restart after upgrade, excluding custom qBittorrent and Docker logic
+# Basic service restart after upgrade, excluding custom qBittTorrent and Docker logic
 if [ -x /etc/init.d/vlmcsd ] && [ -f /etc/config/vlmcsd ]; then
   service vlmcsd restart
 fi
 " > files/usr/lib/upgrade/keep.d/99_restartServices
 chmod +x files/usr/lib/upgrade/keep.d/99_restartServices
 
-# Keep basic mount configuration, add mount for /mnt/sdb2 - 修改处
+# Keep basic mount configuration, add mount for /mnt/sdb2
 mkdir -p files/etc/config
 cat << 'EOF' > files/etc/config/fstab
 config mount
@@ -86,7 +86,7 @@ EOF
 
 mkdir -p files/etc
 echo "#!/bin/sh
-# Basic rc.local, remove qBittorrent symbolic link and service start logic
+# Basic rc.local, remove qBittTorrent symbolic link and service start logic
 # Keep only essential network and system settings
 echo \"Basic system initialization complete\"
 " > files/etc/rc.local

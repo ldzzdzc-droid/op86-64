@@ -104,7 +104,29 @@ jobs:
       run: |
         git clone --depth=1 $REPO_URL -b $REPO_BRANCH openwrt
 
-    - name: Load custom feeds and run part1 script
+    - name: Get OpenWrt commit hash
+      id: openwrt_hash
+      run: |
+        cd openwrt
+        echo "hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+    - name: Set cache key
+      run: |
+        echo "CACHE_KEY=${{ runner.os }}-openwrt-build-cache-${{ steps.openwrt_hash.outputs.hash }}-${{ hashFiles('24.10.config', 'feeds.conf.default', 'diy-24.10-part1.sh', 'diy-24.10-part2.sh') }}" >> $GITHUB_ENV
+
+    - name: Restore cache
+      uses: actions/restore-cache@v3
+      with:
+        path: |
+          openwrt/dl
+          openwrt/build_dir
+        key: ${{ env.CACHE_KEY }}
+        restore-keys: |
+          ${{ env.CACHE_KEY }}
+          openwrt-build-cache-${{ steps.openwrt_hash.outputs.hash }}-
+          openwrt-build-cache-
+
+    - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
@@ -117,7 +139,7 @@ jobs:
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
-    - name: Load custom configuration and run part2 script
+    - name: Load custom configuration
       run: |
         echo "Current directory before operations: $(pwd)"
         ls -l
@@ -156,6 +178,15 @@ jobs:
           echo "status=failure" >> $GITHUB_OUTPUT
           exit 1
         fi
+
+    - name: Save cache
+      uses: actions/save-cache@v3
+      if: steps.compile.outputs.status == 'success'
+      with:
+        path: |
+          openwrt/dl
+          openwrt/build_dir
+        key: ${{ env.CACHE_KEY }}
 
     - name: Debug directory structure
       if: steps.compile.outputs.status == 'success'

@@ -56,10 +56,10 @@ pushd package/lean
 git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
 popd
 
-# Create custom files for basic service management, remove qBittTorrent data persistence and Docker auto-start logic
+# Create custom files for basic service management, remove qBittorrent data persistence and Docker auto-start logic
 mkdir -p files/usr/lib/upgrade/keep.d
 echo "#!/bin/sh
-# Basic service restart after upgrade, excluding custom qBittTorrent and Docker logic
+# Basic service restart after upgrade, excluding custom qBittorrent and Docker logic
 if [ -x /etc/init.d/vlmcsd ] && [ -f /etc/config/vlmcsd ]; then
   service vlmcsd restart
 fi
@@ -86,7 +86,7 @@ EOF
 
 mkdir -p files/etc
 echo "#!/bin/sh
-# Basic rc.local, remove qBittTorrent symbolic link and service start logic
+# Basic rc.local, remove qBittorrent symbolic link and service start logic
 # Keep only essential network and system settings
 echo \"Basic system initialization complete\"
 " > files/etc/rc.local

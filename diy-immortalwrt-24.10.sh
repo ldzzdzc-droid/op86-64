@@ -22,11 +22,9 @@ rm -rf packages-temp
 
 # 更新并安装 feeds
 ./scripts/feeds update -a
-./scripts/feeds install -a -f
-
-# 优先安装 SmartDNS 组件
-./scripts/feeds install -p smartdns
-./scripts/feeds install -p smartdns_luci
-
-# 安装 qBittorrent 相关组件
-./scripts/feeds install -p small
+# 安装指定 feeds，避免无关包
+./scripts/feeds install -a -p smartdns
+./scripts/feeds install -a -p smartdns_luci
+./scripts/feeds install -a -p passwall
+./scripts/feeds install -a -p lucky
+./scripts/feeds install -p small luci-app-qbittorrent qbittorrent libtorrent-rasterbar

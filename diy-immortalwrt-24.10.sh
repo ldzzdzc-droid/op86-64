@@ -11,6 +11,9 @@ echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >
 echo "src-git kenzok8 https://github.com/kenzok8/openwrt-packages.git;master" >> feeds.conf.default
 echo "src-git lucky https://github.com/sirpdboy/luci-app-lucky.git;main" >> feeds.conf.default
 
+# 添加 qBittorrent 相关源
+echo "src-git small https://github.com/kenzok8/small.git;master" >> feeds.conf.default  # 包含 libtorrent-rasterbar 和 qBittorrent
+
 # 强制覆盖 dnsmasq
 rm -rf feeds/packages/net/dnsmasq
 git clone https://github.com/openwrt/packages.git -b openwrt-24.10 packages-temp
@@ -24,3 +27,6 @@ rm -rf packages-temp
 # 优先安装 SmartDNS 组件
 ./scripts/feeds install -p smartdns
 ./scripts/feeds install -p smartdns_luci
+
+# 安装 qBittorrent 相关组件
+./scripts/feeds install -p small

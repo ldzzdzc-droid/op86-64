@@ -8,7 +8,7 @@ echo "src-git smartdns_luci https://github.com/pymumu/luci-app-smartdns.git;mast
 
 # 其他第三方源
 echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> feeds.conf.default
-echo "src-git kenzok8 https://github.com/kenzok8/openwrt-packages.git;master" >> feeds.conf.default
+# echo "src-git kenzok8 https://github.com/kenzok8/openwrt-packages.git;master" >> feeds.conf.default
 echo "src-git lucky https://github.com/sirpdboy/luci-app-lucky.git;main" >> feeds.conf.default
 
 # 添加 qBittorrent 相关源

@@ -1,31 +1,16 @@
-#
-# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-# https://github.com/P3TERX/Actions-OpenWrt
-# Description: Build OpenWrt using GitHub Actions
-#
-
-name: Build immortalwrt_23.05
+name: Build immortalwrt_24.10
 
 on:
   repository_dispatch:
   workflow_dispatch:
 
-# 每周三 执行编译
-#  schedule:
-#    - cron: '30 0 * * 3'
-
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: openwrt-24.10
-#  FILES: ImmortalWRT/files
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: immortalwrt-23.05.config
-  DIY_P1_SH: diy-Immortal01.sh
-  DIY_P2_SH: diy-part23.sh
+  CONFIG_FILE: immortalwrt-24.10.config         # 修改处：更新配置文件名
+  DIY_P1_SH: diy-immortalwrt-24.10.sh          # 修改处：更新脚本名
+  DIY_P2_SH: diy-immortalwrt-24.10.2.sh        # 修改处：更新脚本名
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -112,7 +97,6 @@ jobs:
         cd openwrt
         make defconfig
         make download -j8
-        # 清理下载目录中的小文件和临时文件
         find dl -size -1024c -exec rm -f {} \;
         find dl -name "*.tmp" -exec rm -f {} \;
         find dl -name "*.cache" -exec rm -f {} \;
@@ -135,7 +119,6 @@ jobs:
     - name: Clean up bin directory (remove packages)
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       run: |
-        # 在上传 bin 目录之前移除 packages 文件夹
         rm -rf openwrt/bin/targets/*/*/packages
 
     - name: Upload bin directory
@@ -150,7 +133,6 @@ jobs:
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        # 移除 packages 文件夹，不再创建
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
@@ -176,8 +158,8 @@ jobs:
       uses: ophub/delete-releases-workflows@main
       with:
         delete_releases: true
-        releases_keep_latest: 5  # 减少保留的版本数量，节省空间
+        releases_keep_latest: 5
         delete_tags: true
         delete_workflows: true
-        workflows_keep_day: 30  # 减少保留天数，节省空间
+        workflows_keep_day: 30
         gh_token: ${{ secrets.GITHUB_TOKEN }}

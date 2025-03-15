@@ -24,7 +24,7 @@ rm -rf packages-temp
 # 更新 feeds
 ./scripts/feeds update -a
 
-# 安装指定 feeds，避免无关包
+# 安装指定 feeds，确保 smartdns 和 luci-app-smartdns 被正确安装
 ./scripts/feeds install -a -p smartdns
 ./scripts/feeds install -a -p smartdns_luci
 ./scripts/feeds install -a -p passwall

@@ -31,6 +31,19 @@ config rule
     option target 'ACCEPT'
 EOF
 
+# 确保挂载 NTFS 分区时使用 UTF-8 编码
+mkdir -p files/etc/uci-defaults
+cat << EOF >> files/etc/uci-defaults/99-custom-mount
+#!/bin/sh
+uci add fstab mount
+uci set fstab.@mount[-1].target='/mnt/sdb2'
+uci set fstab.@mount[-1].device='/dev/sdb2'
+uci set fstab.@mount[-1].fstype='ntfs3'
+uci set fstab.@mount[-1].options='uid=0,gid=0,umask=0222,nls=utf8'
+uci set fstab.@mount[-1].enabled='1'
+uci commit fstab
+EOF
+
 # 配置 qBittorrent 默认启动
 mkdir -p files/etc/config
 cat << EOF >> files/etc/config/qbittorrent

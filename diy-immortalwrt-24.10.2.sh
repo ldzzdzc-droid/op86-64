@@ -38,7 +38,7 @@ cat << EOF >> files/etc/uci-defaults/99-custom-mount
 uci add fstab mount
 uci set fstab.@mount[-1].target='/mnt/sdb2'
 uci set fstab.@mount[-1].device='/dev/sdb2'
-uci set fstab.@mount[-1].fstype='ntfs'
+uci set fstab.@mount[-1].fstype='ntfs-3g'  # 明确使用 ntfs-3g
 uci set fstab.@mount[-1].options='uid=0,gid=0,umask=0222,utf8'
 uci set fstab.@mount[-1].enabled='1'
 uci commit fstab

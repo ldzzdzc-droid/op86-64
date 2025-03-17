@@ -14,6 +14,8 @@ env:
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
+  UPLOAD_COWTRANSFER: false  # 明确定义变量
+  UPLOAD_WETRANSFER: false  # 明确定义变量
   TZ: Asia/Shanghai
 
 jobs:
@@ -130,23 +132,27 @@ jobs:
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
-        cd openwrt/bin/targets/x86_64/generic
-        # 修改：删除多余的镜像文件，仅保留 squashfs-combined-efi.img.gz 和必要的附加文件
-        rm -f immortalwrt-x86-64-generic-ext4-combined-efi.img.gz
-        rm -f immortalwrt-x86-64-generic-squashfs-rootfs.img.gz
-        rm -f immortalwrt-x86-64-generic-ext4-rootfs.img.gz
-        rm -f immortalwrt-x86-64-generic-kernel.bin
-        rm -f profiles.json  # 删除不必要的 profiles.json 文件
-        rm -rf packages     # 保持原有的删除 packages 目录操作
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
+        # 检查目录是否存在
+        if [ -d "openwrt/bin/targets/x86_64/generic" ]; then
+          cd openwrt/bin/targets/x86_64/generic
+          # 删除多余的镜像文件，仅保留 squashfs-combined-efi.img.gz 和必要的附加文件
+          rm -f immortalwrt-x86-64-generic-squashfs-rootfs.img.gz
+          rm -f immortalwrt-x86-64-generic-kernel.bin
+          rm -f profiles.json  # 删除不必要的 profiles.json 文件
+          rm -rf packages     # 保持原有的删除 packages 目录操作
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "status=success" >> $GITHUB_OUTPUT
+        else
+          echo "固件目录 openwrt/bin/targets/x86_64/generic 不存在，可能是编译失败。"
+          echo "status=failure" >> $GITHUB_OUTPUT
+        fi
 
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin/targets/x86_64/generic/  # 修改：指定更精确的路径，确保只上传 x86_64/generic 目录
+        path: openwrt/bin/targets/x86_64/generic/  # 指定更精确的路径，确保只上传 x86_64/generic 目录
 
     - name: Generate release tag
       id: tag
@@ -154,8 +160,12 @@ jobs:
       run: |
         echo "RELEASE_TAG=ImmortalWrt-$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
-        [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
-        [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
+        if [ "$UPLOAD_COWTRANSFER" = "true" ]; then
+          echo "🔗 [Cowtransfer]()" >> release.txt
+        fi
+        if [ "$UPLOAD_WETRANSFER" = "true" ]; then
+          echo "🔗 [WeTransfer]()" >> release.txt
+        fi
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Delete releases and workflows runs

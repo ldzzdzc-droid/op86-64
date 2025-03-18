@@ -1,141 +1,179 @@
-name: Build ImmortalWrt
+name: Build immortalwrt_24.10
 
 on:
-  push:
-    branches:
-      - main
+  repository_dispatch:
   workflow_dispatch:
+
+env:
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  REPO_BRANCH: openwrt-24.10
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: immortalwrt-24.10.config
+  DIY_P1_SH: diy-immortalwrt-24.10.sh
+  DIY_P2_SH: diy-immortalwrt-24.10.2.sh
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  UPLOAD_RELEASE: true
+  UPLOAD_COWTRANSFER: false  # 明确定义变量
+  UPLOAD_WETRANSFER: false  # 明确定义变量
+  TZ: Asia/Shanghai
 
 jobs:
   build:
     runs-on: ubuntu-22.04
+    
     steps:
-      # 检查磁盘空间
-      - name: Check Disk Space Before Cleanup
-        run: df -hT
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: true
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        swap-storage: true
+        
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Check server configuration
+      run: |
+        echo "警告⚠"
+        echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
+        echo -e "已知CPU型号(降序): 7763，8370C，8272CL，8171M，E5-2673\n"
+        echo "--------------------------CPU信息--------------------------"
+        echo "CPU物理数量：$(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+        echo -e "CPU核心信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo "--------------------------内存信息--------------------------"
+        echo "已安装内存详细信息："
+        echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
+        echo "--------------------------硬盘信息--------------------------"
+        echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT    
+    
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -yqq install build-essential coreutils make python3 rsync curl wget libssl-dev zlib1g-dev gawk libncurses5-dev file ccache git
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
 
-      # 清理磁盘空间
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          swap-storage: true
-          docker-images: true
+    - name: Clone source code
+      working-directory: /workdir
+      run: |
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-      # 再次检查磁盘空间
-      - name: Check Disk Space After Cleanup
-        run: df -hT
+    - name: Load custom feeds
+      run: |
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        chmod +x $DIY_P1_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P1_SH
 
-      # 确保磁盘空间足够（至少需要 10GB 可用空间）
-      - name: Ensure Enough Disk Space
-        run: |
-          available_space=$(df -h / | awk 'NR==2 {print $4}' | sed 's/G//')
-          if (( $(echo "$available_space < 10" | bc -l) )); then
-            echo "磁盘空间不足，可用空间为 ${available_space}G，需要至少 10G！"
-            exit 1
-          fi
+    - name: Update feeds
+      run: cd openwrt && ./scripts/feeds update -a
 
-      # 检出代码
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Install feeds
+      run: cd openwrt && ./scripts/feeds install -a
 
-      # 设置时区
-      - name: Set Timezone
-        run: |
-          sudo timedatectl set-timezone Asia/Shanghai
+    - name: Load custom configuration
+      run: |
+        [ -e files ] && mv files openwrt/files
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x $DIY_P2_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P2_SH
 
-      # 下载 ImmortalWrt 源码
-      - name: Clone ImmortalWrt Repository
-        run: |
-          git clone https://github.com/immortalwrt/immortalwrt -b openwrt-24.10 openwrt
+    - name: Download package
+      id: package
+      run: |
+        cd openwrt
+        make defconfig
+        make download -j8
+        find dl -size -1024c -exec rm -f {} \;
+        find dl -name "*.tmp" -exec rm -f {} \;
+        find dl -name "*.cache" -exec rm -f {} \;
 
-      # 复制配置文件和自定义脚本
-      - name: Copy Configuration and Scripts
-        run: |
-          cp feeds.conf.default openwrt/feeds.conf
-          cp immortalwrt-24.10.config openwrt/.config
-          cp diy-immortalwrt-24.10.sh openwrt/diy-part1.sh
-          cp diy-immortalwrt-24.10.2.sh openwrt/diy-part2.sh
+    - name: Compile the firmware
+      id: compile
+      run: |
+        cd openwrt
+        echo -e "$(nproc) thread compile"
+        make -j$(nproc) || make -j1 || make -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
-      # 更新和安装 Feeds
-      - name: Update and Install Feeds
-        working-directory: ./openwrt
-        run: |
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+    - name: Check space usage
+      if: (!cancelled())
+      run: df -hT
 
-      # 执行自定义脚本
-      - name: Run DIY Scripts
-        working-directory: ./openwrt
-        run: |
-          chmod +x diy-part1.sh diy-part2.sh
-          ./diy-part1.sh
-          ./diy-part2.sh
+    - name: Clean up bin directory (remove packages)
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      run: |
+        rm -rf openwrt/bin/targets/*/*/packages
 
-      # 编译固件（限制并行任务为 CPU 核心数，避免内存/磁盘压力过大）
-      - name: Compile Firmware
-        working-directory: ./openwrt
-        run: |
-          # 确保配置正确
-          make defconfig
-          # 编译并将日志输出到文件
-          make -j$(nproc) V=s 2>&1 | tee build.log
-        env:
-          DEVICE_NAME: _generic
-          FILE_DATE: _$(date +%Y%m%d%H%M)
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      with:
+        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: openwrt/bin
 
-      # 检查磁盘空间
-      - name: Check Disk Space After Compilation
-        run: df -hT
-
-      # 检查固件是否存在
-      - name: Check Firmware Directory
-        run: |
-          if [ -d "openwrt/bin/targets/x86_64/generic" ]; then
-            cd openwrt/bin/targets/x86_64/generic
-            rm -f immortalwrt-x86-64-generic-squashfs-rootfs.img.gz
-            rm -f immortalwrt-x86-64-generic-kernel.bin
-            rm -f profiles.json
-            rm -rf packages
-            echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-            echo "status=success" >> $GITHUB_OUTPUT
-          else
-            echo "固件目录 openwrt/bin/targets/x86_64/generic 不存在，可能是编译失败。"
-            echo "status=failure" >> $GITHUB_OUTPUT
-            echo "查看编译日志："
-            cat openwrt/build.log
-            exit 1
-          fi
-
-      # 上传固件
-      - name: Upload Firmware
-        if: steps.check-firmware.outputs.status == 'success'
-        uses: actions/upload-artifact@main
-        with:
-          name: firmware-${{ env.DEVICE_NAME }}-${{ env.FILE_DATE }}
-          path: ${{ env.FIRMWARE }}
-
-      # 创建 Release
-      - name: Create Release Tag
-        if: steps.check-firmware.outputs.status == 'success'
-        run: |
-          echo "RELEASE_TAG=ImmortalWrt-$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
-          touch release.txt
+    - name: Organize files
+      id: organize
+      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      run: |
+        # 检查目录是否存在
+        if [ -d "openwrt/bin/targets/x86_64/generic" ]; then
+          cd openwrt/bin/targets/x86_64/generic
+          # 删除多余的镜像文件，仅保留 squashfs-combined-efi.img.gz 和必要的附加文件
+          rm -f immortalwrt-x86-64-generic-squashfs-rootfs.img.gz
+          rm -f immortalwrt-x86-64-generic-kernel.bin
+          rm -f profiles.json  # 删除不必要的 profiles.json 文件
+          rm -rf packages     # 保持原有的删除 packages 目录操作
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
+        else
+          echo "固件目录 openwrt/bin/targets/x86_64/generic 不存在，可能是编译失败。"
+          echo "status=failure" >> $GITHUB_OUTPUT
+        fi
 
-      # 删除旧的 Releases 和 Workflows
-      - name: Delete Old Releases and Workflows
-        uses: ophub/delete-releases-workflows@main
-        with:
-          delete_releases: true
-          releases_keep_latest: 5
-          delete_tags: true
-          delete_workflows: true
-          workflows_keep_day: 30
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease_option: all
-          out_log: false
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: openwrt/bin/targets/x86_64/generic/  # 指定更精确的路径，确保只上传 x86_64/generic 目录
+
+    - name: Generate release tag
+      id: tag
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+        echo "RELEASE_TAG=ImmortalWrt-$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        touch release.txt
+        if [ "$UPLOAD_COWTRANSFER" = "true" ]; then
+          echo "🔗 [Cowtransfer]()" >> release.txt
+        fi
+        if [ "$UPLOAD_WETRANSFER" = "true" ]; then
+          echo "🔗 [WeTransfer]()" >> release.txt
+        fi
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Delete releases and workflows runs
+      uses: ophub/delete-releases-workflows@main
+      with:
+        delete_releases: true
+        releases_keep_latest: 5
+        delete_tags: true
+        delete_workflows: true
+        workflows_keep_day: 30
+        gh_token: ${{ secrets.GITHUB_TOKEN }}

@@ -47,7 +47,7 @@ jobs:
         git clone --depth=1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
         echo "src-git kenzo https://github.com/kenzok8/openwrt-packages.git;main" >> feeds.conf.default
-        make update -j8
+        # 移除 make update -j8，避免触发 menuconfig
 
     - name: Load Custom Feeds and Configuration
       run: |
@@ -55,8 +55,9 @@ jobs:
         cp ../$CONFIG_FILE .config
         chmod +x ../$DIY_SH
         chmod +x ../$DIY_SH2
-        ../$DIY_SH
-        ../$DIY_SH2
+        ../$DIY_SH  # 更新和安装 Feeds
+        ../$DIY_SH2 # 应用自定义配置
+        make defconfig  # 生成默认配置，避免交互式 menuconfig
 
     - name: Download Packages
       run: |
@@ -67,39 +68,24 @@ jobs:
       run: |
         cd openwrt
         make -j$(nproc) || make -j1 V=s
-        echo "Status code: $?"
-        make -j$(nproc) download DOIT=1
-        make -j$(nproc) clean package/index
-        make -j$(nproc) world
-        make -j$(nproc) clean package/index
-        make -j$(nproc) download DOIT=1
-        make -j$(nproc) clean package/index
-        make -j$(nproc) world
+        echo "Compile completed with status: $?"
 
     - name: Organize and Upload Files
       run: |
         cd openwrt/bin/targets/x86/64/
-        find . -maxdepth 1 -name "immortalwrt-x86-64-generic-squashfs-combined-efi.img.gz" -exec cp {} ./ \;
-        cd ../../../../
-        cp -r ./bin ./output
-        cp -r ./build_dir ./output
-        7z a -tzip output.zip output/
-        sha256sum output.zip > output.zip.sha256sum
-        echo "immortalwrt-x86-64-generic-squashfs-combined-efi.img.gz" > firmware.list
-        echo "sha256sums" >> firmware.list
-        echo "config.buildinfo" >> firmware.list
-        echo "feeds.buildinfo" >> firmware.list
-        echo "version.buildinfo" >> firmware.list
-        7z a -tzip firmware.zip $(cat firmware.list)
-        sha256sum firmware.zip > firmware.zip.sha256sum
+        # 确保只保留需要的文件
+        find . -maxdepth 1 -type f -not -name "immortalwrt-x86-64-generic-squashfs-combined-efi.img.gz" \
+          -not -name "sha256sums" -not -name "config.buildinfo" -not -name "feeds.buildinfo" \
+          -not -name "version.buildinfo" -exec rm -f {} \;
+        sha256sum immortalwrt-x86-64-generic-squashfs-combined-efi.img.gz > sha256sums
 
     - name: Upload Firmware
-      uses: actions/upload-artifact@v4  # Updated from v3 to v4
+      uses: actions/upload-artifact@v4
       with:
         name: Firmware
         path: |
           openwrt/bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-combined-efi.img.gz
-          sha256sums
-          config.buildinfo
-          feeds.buildinfo
-          version.buildinfo
+          openwrt/bin/targets/x86/64/sha256sums
+          openwrt/bin/targets/x86/64/config.buildinfo
+          openwrt/bin/targets/x86/64/feeds.buildinfo
+          openwrt/bin/targets/x86/64/version.buildinfo

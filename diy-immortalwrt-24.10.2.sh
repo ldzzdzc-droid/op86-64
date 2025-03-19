@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 设置默认 IP
+# 设置默认 IP 为 10.0.0.8
 sed -i 's/192.168.1.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 sed -i 's/192.168.10.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 
@@ -19,7 +19,7 @@ config interface 'wan6'
     option reqprefix 'auto'
 EOF
 
-# 防火墙规则
+# 防火墙规则，允许 IPv6 转发
 sed -i '/config zone/,/option forward/s/REJECT/ACCEPT/' package/network/config/firewall/files/firewall.config
 cat << EOF >> package/network/config/firewall/files/firewall.config
 config rule
@@ -31,20 +31,20 @@ config rule
     option target 'ACCEPT'
 EOF
 
-# 确保挂载 NTFS 分区时使用 ntfs-3g 和 UTF-8 编码
+# 确保 NTFS 分区挂载使用 ntfs-3g 和 UTF-8 编码
 mkdir -p files/etc/uci-defaults
 cat << EOF >> files/etc/uci-defaults/99-custom-mount
 #!/bin/sh
 uci add fstab mount
 uci set fstab.@mount[-1].target='/mnt/sdb2'
 uci set fstab.@mount[-1].device='/dev/sdb2'
-uci set fstab.@mount[-1].fstype='ntfs-3g'  # 明确使用 ntfs-3g
+uci set fstab.@mount[-1].fstype='ntfs-3g'
 uci set fstab.@mount[-1].options='uid=0,gid=0,umask=0222,utf8'
 uci set fstab.@mount[-1].enabled='1'
 uci commit fstab
 EOF
 
-# 配置 qBittorrent 默认启动
+# 配置 qBittorrent 默认启动，端口为 8080
 mkdir -p files/etc/config
 cat << EOF >> files/etc/config/qbittorrent
 config qbittorrent 'main'

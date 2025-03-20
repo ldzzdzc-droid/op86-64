@@ -30,12 +30,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Check Server Configuration
-      run: |
-        echo "CPU cores: $(nproc)"
-        echo "Memory: $(free -h | grep Mem: | awk '{print $2}')"
-        echo "Disk: $(df -h | grep / | awk '{print $2}')"
-
     - name: Initialization Environment
       run: |
         sudo apt update -y
@@ -47,12 +41,26 @@ jobs:
         git clone --depth=1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
         echo "src-git kenzo https://github.com/kenzok8/openwrt-packages.git;main" >> feeds.conf.default
+        echo "src-git luci https://github.com/immortalwrt/luci.git;openwrt-24.10" >> feeds.conf.default
+        echo "src-git packages https://github.com/immortalwrt/packages.git;openwrt-24.10" >> feeds.conf.default
+        echo "src-git routing https://github.com/immortalwrt/routing.git;openwrt-24.10" >> feeds.conf.default
+        echo "src-git telephony https://github.com/immortalwrt/telephony.git;openwrt-24.10" >> feeds.conf.default
 
-    - name: Load Custom Feeds and Configuration
+    - name: Update and Install Feeds
+      run: |
+        cd openwrt
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+    - name: Load Custom Configuration
       run: |
         cd openwrt
         cp ../$CONFIG_FILE .config
         make oldconfig  # 确保配置与源代码兼容
+
+    - name: Apply DIY Scripts
+      run: |
+        cd openwrt
         chmod +x ../$DIY_SH
         chmod +x ../$DIY_SH2
         ../$DIY_SH

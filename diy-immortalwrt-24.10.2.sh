@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# 添加额外的 Feeds
-echo "src-git smartdns https://github.com/pymumu/smartdns;master" >> feeds.conf.default
-echo "src-git smartdns_luci https://github.com/pymumu/luci-app-smartdns;master" >> feeds.conf.default
-echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall;main" >> feeds.conf.default
-echo "src-git lucky https://github.com/sirpdboy/luci-app-lucky;main" >> feeds.conf.default
-echo "src-git small https://github.com/kenzok8/small;master" >> feeds.conf.default
+# 设置默认 IP 为 10.0.0.8
+sed -i 's/192.168.1.1/10.0.0.8/g' package/base-files/files/bin/config_generate
+sed -i 's/192.168.10.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 
-# 更新并安装 Feeds
-./scripts/feeds update -a
-./scripts/feeds install -a
+# 生成默认配置
+make defconfig

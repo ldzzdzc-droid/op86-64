@@ -52,4 +52,5 @@ config qbittorrent 'main'
     option port '8080'
 EOF
 
+# 生成默认配置
 make defconfig

@@ -49,8 +49,9 @@ jobs:
     - name: Load Custom Configuration
       run: |
         cd openwrt
-        cp ../$CONFIG_FILE .config
-        make oldconfig  # 确保配置与源代码兼容
+        make defconfig  # 生成默认配置
+        cp ../$CONFIG_FILE .config  # 应用自定义配置
+        make oldconfig  # 确保自定义配置与默认配置兼容
 
     - name: Apply DIY Scripts
       run: |
@@ -68,7 +69,7 @@ jobs:
     - name: Compile the Firmware
       run: |
         cd openwrt
-        make -j$(nproc) || make -j1 V=s  # 多核编译，若失败则单核带详细日志
+        make -j$(nproc) || make -j1 V=s
 
     - name: Organize and Upload Files
       run: |

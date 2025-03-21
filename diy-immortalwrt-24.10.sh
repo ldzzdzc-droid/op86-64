@@ -10,3 +10,14 @@ echo "src-git small https://github.com/kenzok8/small;master" >> feeds.conf.defau
 # 更新并安装 Feeds
 ./scripts/feeds update -a
 ./scripts/feeds install -a
+
+# Remove unwanted packages
+rm -rf ./feeds/small/luci-app-bypass
+rm -rf ./feeds/small/luci-app-ssr-plus
+
+# Install feeds
+./scripts/feeds install -a -p smartdns
+./scripts/feeds install -a -p smartdns_luci
+./scripts/feeds install -a -p passwall
+./scripts/feeds install -a -p lucky
+./scripts/feeds install -a -p small

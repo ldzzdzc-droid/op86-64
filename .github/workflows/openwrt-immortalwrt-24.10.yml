@@ -83,12 +83,22 @@ jobs:
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
+    # ========== 修改点 1: 强制覆盖配置确保仅生成 EFI+GZIP ==========
     - name: Load custom configuration
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_P2_SH
         cd openwrt
+        # 强制写入关键配置项
+        echo "CONFIG_TARGET_IMAGES_GZIP=y" >> .config
+        echo "CONFIG_EFI_IMAGES=y" >> .config
+        echo "CONFIG_GRUB_IMAGES=y" >> .config
+        echo "CONFIG_GRUB_EFI_IMAGES=y" >> .config
+        echo "CONFIG_TARGET_IMAGES_EXT4FS=n" >> .config
+        echo "CONFIG_TARGET_IMAGES_ISO=n" >> .config
+        echo "CONFIG_VMDK_IMAGES=n" >> .config
+        # 确保自定义脚本不会覆盖配置
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
     - name: Download package
@@ -128,21 +138,25 @@ jobs:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
 
+    # ========== 修改点 2: 删除非目标文件 ==========
     - name: Organize files
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
+        # 删除所有非 EFI+GZIP 的固件文件
+        find . -type f ! -name '*squashfs-combined-efi.img.gz' -delete
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
+    # ========== 修改点 3: 指定上传目标文件 ==========
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}
+        path: ${{ env.FIRMWARE }}/*squashfs-combined-efi.img.gz  # 通配符匹配目标文件
 
     - name: Generate release tag
       id: tag

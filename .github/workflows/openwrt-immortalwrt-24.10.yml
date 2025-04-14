@@ -130,8 +130,8 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
-        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
+        name: immortalwrt_firmware_generic_${{ env.FILE_DATE }}
+        path: ${{ env.FIRMWARE }}/immortalwrt-x86-64-generic-squashfs-combined-efi.img.gz
 
     - name: Organize files
       id: organize

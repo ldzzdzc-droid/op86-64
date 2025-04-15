@@ -31,12 +31,5 @@ config rule
     option target 'ACCEPT'
 EOF
 
-# 配置 qBittorrent 默认启动
-mkdir -p files/etc/config
-cat << EOF >> files/etc/config/qbittorrent
-config qbittorrent 'main'
-    option enabled '1'
-    option port '8080'
-EOF
 
 make defconfig

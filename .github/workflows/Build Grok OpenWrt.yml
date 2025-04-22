@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+# Copyright (c) 2019-2020 P3TERX <[invalid url, do not cite]
 #
 # This is free software, licensed under the MIT License.
 # See /LICENSE for more information.
@@ -80,22 +80,17 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
 
-    - name: Set up Go
+    - name: Set up Go  # <--- 新增：设置 Go 版本
       uses: actions/setup-go@v5
       with:
         go-version: '1.24.2'
+
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-        bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
-        git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev \
-        libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
-        mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools \
-        libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip \
-        vim wget xmlto xxd zlib1g-dev python3-setuptools
+        sudo -E apt-get -qq install build-essential bison flex libncursesw5-dev libssl-dev libelf-dev libmpc-dev libmpfr-dev libgmp3-dev gawk gcc-multilib gettext libtool patch python3 python3-distutils autoconf automake unzip subversion wget ccache pkgconf ninja-build rsync scons squashfs-tools swig upx-ucl libpython3-dev qemu-utils device-tree-compiler libreadline-dev libncurses5-dev zlib1g-dev libbz2-dev liblzma-dev libsqlite3-dev libpcre3-dev curl git
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo rm -rf /etc/apt/sources.list.d/* /usr/local/lib/android /opt/ghc /usr/share/dotnet /usr/local/graalvm /usr/local/.ghcup \

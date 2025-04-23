@@ -80,10 +80,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
 
-    - name: Set up Go  # <--- 新增：设置 Go 版本
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24.2'
+  # - name: Set up Go  # <--- 新增：设置 Go 版本
+  #   uses: actions/setup-go@v5
+  #   with:
+  #     go-version: '1.24.2'
 
     - name: Initialization environment
       env:

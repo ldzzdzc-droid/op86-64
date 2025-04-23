@@ -5,7 +5,7 @@ echo "src-git smartdns https://github.com/pymumu/smartdns;master" >> feeds.conf.
 echo "src-git smartdns_luci https://github.com/pymumu/luci-app-smartdns;master" >> feeds.conf.default
 echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall;main" >> feeds.conf.default
 echo "src-git lucky https://github.com/sirpdboy/luci-app-lucky;main" >> feeds.conf.default
-echo "src-git small https://github.com/kenzok8/small;master" >> feeds.conf.default
+# echo "src-git small https://github.com/kenzok8/small;master" >> feeds.conf.default
 
 # Force cover dnsmasq
 rm -rf feeds_packages_net_dnsmasq

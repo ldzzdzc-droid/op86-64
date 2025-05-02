@@ -34,9 +34,9 @@ sed -i 's|https://codeload.github.com/zfl9/ipt2socks/tar.gz/v1.1.5?|https://gith
 # Change kernel version to 6.6
 sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.6/g' target/linux/x86/Makefile
 
-# Update smartdns version
-sed -i 's/1.2023.42/1.2024.46/g' feeds/packages/net/smartdns/Makefile
-sed -i 's/ed102cda03c56e9c63040d33d4a391b56491493e/07c13827bb523519a638214ed7ad76180f71a40a/g' feeds/packages/net/smartdns/Makefile
+# Update SmartDNS version
+sed -i 's/1.2024.45/1.2024.46/g' feeds/packages/net/smartdns/Makefile
+sed -i 's/9ee27e7ba2d9789b7e007410e76c06a957f85e98/b525170bfd627607ee5ac81f97ae0f1f4f087d6b/g' feeds/packages/net/smartdns/Makefile
 sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 
 # Add extra packages

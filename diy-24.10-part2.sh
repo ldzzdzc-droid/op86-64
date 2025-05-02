@@ -45,7 +45,7 @@ sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' packag
 
 # Update SmartDNS version
 sed -i 's/1.2023.42/1.2024.46/g' feeds/packages/net/smartdns/Makefile
-sed -i 's/ed102cda03c56e9c63040d33d4a391b56491493e/07c13827bb523519a638214ed7ad76180f71a40a/g' feeds/packages/net/smartdns/Makefile
+sed -i 's/ed102cda03c56e9c63040d33d4a391b56491493e/b525170bfd627607ee5ac81f97ae0f1f4f087d6b/g' feeds/packages/net/smartdns/Makefile
 sed -i 's/^PKG_MIRROR_HASH/#&/' feeds/packages/net/smartdns/Makefile
 
 # Add Lucky app

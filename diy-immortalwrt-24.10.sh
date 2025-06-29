@@ -1,8 +1,12 @@
 #!/bin/bash
 
 # Adding feeds
-echo "src-git smartdns https://github.com/pymumu/smartdns;master" >> feeds.conf.default
-echo "src-git smartdns_luci https://github.com/pymumu/luci-app-smartdns;master" >> feeds.conf.default
+# 添加 smartdns 仓库
+git clone https://github.com/pymumu/smartdns.git package/smartdns
+# 添加 luci-app-smartdns 仓库
+git clone https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
+# echo "src-git smartdns https://github.com/pymumu/smartdns;master" >> feeds.conf.default
+# echo "src-git smartdns_luci https://github.com/pymumu/luci-app-smartdns;master" >> feeds.conf.default
 echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall;main" >> feeds.conf.default
 echo "src-git lucky https://github.com/sirpdboy/luci-app-lucky;main" >> feeds.conf.default
 # echo "src-git small https://github.com/kenzok8/small;master" >> feeds.conf.default
@@ -21,8 +25,8 @@ rm -rf ./feeds/small/luci-app-bypass
 rm -rf ./feeds/small/luci-app-ssr-plus
 
 # Install feeds
-./scripts/feeds install -a -p smartdns
-./scripts/feeds install -a -p smartdns_luci
+# ./scripts/feeds install -a -p smartdns
+# ./scripts/feeds install -a -p smartdns_luci
 ./scripts/feeds install -a -p passwall
 ./scripts/feeds install -a -p lucky
 ./scripts/feeds install -a -p small

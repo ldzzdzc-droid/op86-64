@@ -4,6 +4,9 @@
 sed -i 's/192.168.1.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 sed -i 's/192.168.10.1/10.0.0.8/g' package/base-files/files/bin/config_generate
 
+rm -rf feeds/packages/net/smartdns
+rm -rf feeds/luci/applications/luci-app-smartdns
+
 # IPv6 配置
 cat << EOF >> package/base-files/files/etc/config/network
 config interface 'lan'

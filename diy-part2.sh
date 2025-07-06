@@ -32,7 +32,7 @@ git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/luci-a
 sed -i 's|https://codeload.github.com/zfl9/ipt2socks/tar.gz/v1.1.5?|https://github.com/zfl9/ipt2socks/archive/refs/tags/v1.1.5.tar.gz|' package/openwrt-passwall/ipt2socks/Makefile
 
 # Change kernel version to 6.6
-sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.12/g' target/linux/x86/Makefile
+sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.6/g' target/linux/x86/Makefile
 
 # Update SmartDNS version
 sed -i 's/1.2024.45/1.2024.46/g' feeds/packages/net/smartdns/Makefile

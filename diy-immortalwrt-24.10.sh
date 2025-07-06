@@ -1,12 +1,12 @@
 #!/bin/bash
 # Adding feeds
 
-rm -rf feeds/packages/net/smartdns
-rm -rf feeds/luci/applications/luci-app-smartdns
+# rm -rf feeds/packages/net/smartdns
+# rm -rf feeds/luci/applications/luci-app-smartdns
 # 添加 smartdns 仓库
-git clone https://github.com/pymumu/smartdns.git package/smartdns
+# git clone https://github.com/pymumu/smartdns.git package/smartdns
 # 添加 luci-app-smartdns 仓库
-git clone https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
+# git clone https://github.com/pymumu/luci-app-smartdns.git package/luci-app-smartdns
 # echo "src-git smartdns https://github.com/pymumu/smartdns;master" >> feeds.conf.default
 # echo "src-git smartdns_luci https://github.com/pymumu/luci-app-smartdns;master" >> feeds.conf.default
 echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall;main" >> feeds.conf.default

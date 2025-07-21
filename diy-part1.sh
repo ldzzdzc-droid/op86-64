@@ -11,8 +11,8 @@
 #
 # Add a feed source
 ########### 更改大雕源码（可选）########
-sed -i 's/KERNEL_PATCHVER:=6.6/KERNEL_PATCHVER:=6.12/g' ./target/linux/x86/Makefile
-sed -i 's/KERNEL_PATCHVER:=5.15/KERNEL_PATCHVER:=6.6/g' ./target/linux/x86/Makefile
+# 更稳健的写法：无论当前版本直接设为6.12
+sed -i 's/^KERNEL_PATCHVER\s*:=\s*.*/KERNEL_PATCHVER:=6.12/' ./target/linux/x86/Makefile
 
 # sed -i '$a src-git lienol https://github.com/Lienol/openwrt-package' feeds.conf.default
 # sed -i '$a src-git kenzo https://github.com/kenzok8/openwrt-packages' feeds.conf.default

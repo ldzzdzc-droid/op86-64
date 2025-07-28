@@ -138,6 +138,12 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
+    - name: Clean build environment
+      run: |
+        cd openwrt
+        make clean
+        echo "Build environment cleaned."
+
     - name: Compile the firmware
       id: compile
       run: |

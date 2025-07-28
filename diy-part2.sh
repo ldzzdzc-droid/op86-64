@@ -47,13 +47,3 @@ popd
 
 # Correct connection count
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
-
-# Modify kernel's tools/objtool/Makefile to include -lz - 修改处
-KERNEL_DIR=$(find build_dir/target-x86_64_musl/linux-x86_64/ -maxdepth 1 -type d -name 'linux-*')
-if [ -n "$KERNEL_DIR" ]; then
-  sed -i 's/HOSTLDLIBS_objtool = -lelf/HOSTLDLIBS_objtool = -lelf -lz/' "$KERNEL_DIR/tools/objtool/Makefile"
-  echo "Modified $KERNEL_DIR/tools/objtool/Makefile to include -lz"
-else
-  echo "Kernel directory not found"
-  exit 1
-fi

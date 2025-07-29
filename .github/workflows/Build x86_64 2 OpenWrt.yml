@@ -92,13 +92,12 @@ jobs:
           sudo timedatectl set-timezone "$TZ"
           sudo chown $USER:$GROUPS $GITHUB_WORKSPACE
 
-      - name: Clone OpenWrt Source Code
+      - name: Clone source code
         working-directory: ./
         run: |
-          git clone --depth=1 $REPO_URL -b $REPO_BRANCH openwrt
+          git clone $REPO_URL openwrt
           cd openwrt
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
+          git checkout 874fee50ebb86b7acea5b57e2ba794a9897b6355  # 回滚到指定提交 - 修改处
 
       - name: Load Custom Feeds
         run: |
